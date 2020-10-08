@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 24606cf09217
+Revision ID: bef38914d4e0
 Revises: 
-Create Date: 2020-10-06 00:07:25.655187
+Create Date: 2020-10-06 23:43:03.887959
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '24606cf09217'
+revision = 'bef38914d4e0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -39,7 +39,9 @@ def upgrade():
     sa.Column('updatedAt', sa.DateTime(), nullable=True),
     sa.Column('deletedAt', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('id')
+    sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('id'),
+    sa.UniqueConstraint('username')
     )
     op.create_table('posts',
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -50,6 +52,7 @@ def upgrade():
     sa.Column('updatedAt', sa.DateTime(), nullable=True),
     sa.Column('deletedAt', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['contentId'], ['content.id'], ),
+    sa.ForeignKeyConstraint(['parentId'], ['posts.id'], ),
     sa.ForeignKeyConstraint(['userId'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')

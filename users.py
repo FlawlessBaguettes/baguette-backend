@@ -1,92 +1,90 @@
 from __main__ import app
+from app import db
 from datetime import date
-
-users = [
-    {
-        'id': 1,
-        'userName': u'RajatGo',
-        'password': '12345',
-        'firstName': u'Rajat',
-        'lastName': u'Goswami',
-        'dateOfBirth': date(1994, 4, 18),
-        'createdAt': date(2020, 9, 20),
-        'updatedAt': date(2020, 9, 22)
-    },
-        {
-        'id': 1,
-        'userName': u'RaghavG',
-        'password': 'myPass',
-        'firstName': u'Raghav',
-        'lastName': u'Goswami',
-        'dateOfBirth': date(1994, 4, 18),
-        'createdAt': date(2020, 9, 10),
-        'updatedAt': date(2020, 9, 14)
-    },
-    {
-        'id': 1,
-        'userName': u'SibH',
-        'password': '12345',
-        'firstName': u'Sibgatul',
-        'lastName': u'Husnain',
-        'dateOfBirth': date(1994, 9, 15),
-        'createdAt': date(2020, 8, 8),
-        'updatedAt': date(2020, 8, 22)
-    }
-]
+from flask import Flask, request, jsonify
+from baguette_backend.models import user as user_model
 
 @app.route('/baguette/api/v1.0/users', methods=['GET'])
 def get_users():
-    return jsonify({'users': users})
+    try:
+        users = user_model.User.query.all()
+        return jsonify({'users': [u.serialize() for u in users]}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
 
-@app.route('/baguette/api/v1.0/users/<int:user_id>', methods=['GET'])
+@app.route('/baguette/api/v1.0/users/<user_id>', methods=['GET'])
 def get_user(user_id):
-    user = [user for user in users if user['id'] == user_id]
-    if len(user) == 0:
-        abort(404)
-    return jsonify({'user': user[0]})
+    try:
+        user = user_model.User.query.filter_by(id=user_id).first()
+        return jsonify({'user': user.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
 
 @app.route('/baguette/api/v1.0/users', methods=['POST'])
 def create_user():
-    if not request.json or not 'userName' in request.json:
-        abort(400)
-    user = {
-        'id': users[-1]['id'] + 1,
-        'userName': request.json['userName'],
-        'firstName': request.json['firstName'],
-        'lastName': request.json['lastName'],
-        'dateOfBirth': date(request.json('dateOfBirth')),
-        'createdAt': date.today(),
-        'updatedAt': date.today()
-    }
-    users.append(user)
-    return jsonify({'user': user}), 201
+    username = request.form.get('username')
+    y, m, d = request.form.get('date_of_birth').split('-')
+    try:
+        user = user_model.User(
+            username = username,
+            password = request.form.get('password'),
+            email = request.form.get('email'),
+            first_name = request.form.get('first_name'),
+            last_name = request.form.get('last_name'),
+            date_of_birth = date(int(y), int(m), int(d))
+        )
+        db.session.add(user)
+        db.session.commit()
+        print("User {} added user id={}".format(username, user.id))
+        return jsonify({'user': user.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
 
-@app.route('/baguette/api/v1.0/users/<int:user_id>', methods=['PUT'])
+@app.route('/baguette/api/v1.0/users/<user_id>', methods=['PUT'])
 def update_user(user_id):
-    user = [user for user in users if user['id'] == user_id]
-    if len(user) == 0:
-        abort(404)
-    if not request.json:
-        abort(400)
-    if 'userName' in request.json and type(request.json['userName']) is not unicode:
-        abort(400)
-    if 'firstName' in request.json and type(request.json['firstName']) is not unicode:
-        abort(400)
-    if 'lastName' in request.json and type(request.json['done']) is not unicode:
-        abort(400)
-    if 'dateOfBirth' in request.json and type(request.json['dateOfBirth']) is not datetime.date:
-        abort(400)
-    user[0]['userName'] = request.json.get('userName', user[0]['userName'])
-    user[0]['firstName'] = request.json.get('firstName', user[0]['firstName'])
-    user[0]['lastName'] = request.json.get('lastName', user[0]['lastName'])
-    user[0]['dateOfBirth'] = request.json.get('dateOfBirth', user[0]['dateOfBirth'])
-    user[0]['updatedAt'] = date.today()
-    return jsonify({'user': user[0]})
+    try:
+        user = user_model.User.query.filter_by(id=user_id).first()
+        
+        username = request.form.get('username')
+        user.username = username if username != None else user.username
 
-@app.route('/baguette/api/v1.0/users/<int:user_id>', methods=['DELETE'])
+        password = request.form.get('password')
+        user.password = password if password != None else user.password
+
+        email = request.form.get('email')
+        user.email = email if email != None else user.email
+
+        first_name = request.form.get('first_name')
+        user.first_name = first_name if first_name != None else user.first_name
+
+        last_name = request.form.get('last_name')
+        user.last_name = last_name if last_name != None else user.last_name
+
+        date_of_birth = request.form.get('date_of_birth')
+        if date_of_birth != None:
+            y, m, d = request.form.get('date_of_birth').split('-')
+            user.date_of_birth = date(int(y), int(m), int(d))
+        else:
+            user.date_of_birth = user.date_of_birth
+        
+        db.session.commit()
+        
+        print("User {} updated user id={}".format(username, user.id))
+        return jsonify({'user': user.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
+
+@app.route('/baguette/api/v1.0/users/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    user = [user for user in users if user['id'] == user_id]
-    if len(user) == 0:
-        abort(404)
-    users.remove(user[0])
-    return jsonify({'result': True})
+    try:
+        user = user_model.User.query.filter_by(id=user_id).first()
+        db.session.delete(user)
+        db.session.commit()
+        print("User {} deleted user id={}".format(username, user.id))
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))

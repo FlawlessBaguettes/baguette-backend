@@ -12,7 +12,7 @@ class Content(db.Model):
 
 
     post = db.relationship('Post', backref='content', uselist=False)
-    
+
     #TO DO: Update to utcnow()
     createdAt = Column(DateTime, server_default=func.now())
     updatedAt = Column(DateTime, onupdate=func.now())
@@ -23,3 +23,12 @@ class Content(db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            "contentUrl": self.contentUrl,
+            'createdAt': self.createdAt,
+            'updatedAt': self.updatedAt,
+            'deletedAt': self.deletedAt
+        }

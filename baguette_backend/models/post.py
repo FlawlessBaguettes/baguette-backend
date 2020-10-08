@@ -8,7 +8,7 @@ class Post(db.Model):
     __tablename__ = 'posts'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    parentId = db.Column(UUID(as_uuid=True))
+    parentId = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'))
     contentId = db.Column(UUID(as_uuid=True), db.ForeignKey('content.id'))
     userId = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'))
     #TO DO: Update to utcnow()

@@ -8,10 +8,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 from baguette_backend.models import content, post, user
-# import users
+import users
 # import email_address
 # import post
-# import content
+import content
 
 @app.route('/')
 def index():

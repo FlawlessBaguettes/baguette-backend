@@ -7,10 +7,10 @@ import uuid
 class User(db.Model):
     __tablename__ = 'users'
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    username = Column(db.String(), nullable=False)
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False, primary_key=True, unique=True,)
+    username = Column(db.String(), nullable=False, unique=True,)
     password = Column(db.String(), nullable=False)
-    email = Column(db.String(), nullable=False)
+    email = Column(db.String(), nullable=False, unique=True,)
     first_name = Column(db.String(), nullable=False)
     last_name = Column(db.String(), nullable=False)
     date_of_birth = Column(DateTime, nullable=False)
@@ -32,3 +32,16 @@ class User(db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            "username": self.username,
+            'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'last_name': self.date_of_birth,
+            'createdAt': self.createdAt,
+            'updatedAt': self.updatedAt,
+            'deletedAt': self.deletedAt
+        }

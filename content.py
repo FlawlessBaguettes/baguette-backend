@@ -1,52 +1,54 @@
 from __main__ import app
-from datetime import date
-
-content_uploads = [
-    {
-        'id': 1,
-        'contentUrl': u'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        'createdAt': date(2020, 9, 26),
-        'updatedAtAt': date(2020, 9, 27)
-    }
-]
-
-@app.route('/baguette/api/v1.0/content/<int:content_id>', methods=['GET'])
-def get_content(content_id):
-    content = [content for content in content_uploads if content_uploads['id'] == content_id]
-    if len(content) == 0:
-        abort(404)
-    return jsonify({'content': content[0]})
+from app import db
+from flask import Flask, request, jsonify
+from baguette_backend.models import content as content_model
 
 @app.route('/baguette/api/v1.0/content', methods=['POST'])
 def create_content():
-    if not request.json or not 'contentUrl' in request.json:
-        abort(400)
-    content = {
-        'id': users[-1]['id'] + 1,
-        'contentUrl': request.json['contentUrl'],
-        'createdAt': date.today(),
-        'updatedAt': date.today()
-    }
-    content_uploads.append(content)
-    return jsonify({'content': content_uploads}), 201
+    try:
+        content = content_model.Content(
+            url = request.form.get('url'),
+        )
+        db.session.add(content)
+        db.session.commit()
+        print("Content added content id={}".format(content.id))
+        return jsonify({'content': content.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
 
-@app.route('/baguette/api/v1.0/content/<int:content_id>', methods=['PUT'])
+@app.route('/baguette/api/v1.0/content/<content_id>', methods=['GET'])
+def get_content(content_id):
+    try:
+        content = content_model.Content.query.filter_by(id=content_id).first()
+        return jsonify({'content': content.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
+
+
+@app.route('/baguette/api/v1.0/content/<content_id>', methods=['PUT'])
 def update_content(content_id):
-    content = [content for content in content_uploads if content['id'] == content_id]
-    if len(content) == 0:
-        abort(404)
-    if not request.json:
-        abort(400)
-    if 'contentUrl' in request.json and type(request.json['contentUrl']) is not unicode:
-        abort(400)
-    content[0]['contentUrl'] = request.json.get('contentUrl', content[0]['contentUrl'])
-    content[0]['updatedAt'] = date.today()
-    return jsonify({'content': content[0]})
+    try:
+        content = content_model.Content.query.filter_by(id=content_id).first()
 
-@app.route('/baguette/api/v1.0/content/<int:content_id>', methods=['DELETE'])
+        contentUrl = request.form.get('url')
+        content.contentUrl = contentUrl if contentUrl != None else content.contentUrl
+        
+        db.session.commit()
+        print("Content updated content id={}".format(content.id))
+        return jsonify({'content': content.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
+
+@app.route('/baguette/api/v1.0/content/<content_id>', methods=['DELETE'])
 def delete_content(content_id):
-    content = [content for content in content_uploads if content['id'] == content_id]
-    if len(content) == 0:
-        abort(404)
-    content_uploads.remove(content[0])
-    return jsonify({'result': True})
+    try:
+        content = content_model.Content.query.filter_by(id=content_id).first()
+        db.session.delete(content)
+        db.session.commit()
+        return "Content deleted content id={}".format(content.id), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
