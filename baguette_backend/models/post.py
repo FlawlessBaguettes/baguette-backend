@@ -23,3 +23,14 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            "parentId": self.parentId,
+            'contentId': self.contentId,
+            'userId': self.userId,
+            'createdAt': self.createdAt,
+            'updatedAt': self.updatedAt,
+            'deletedAt': self.deletedAt
+        }

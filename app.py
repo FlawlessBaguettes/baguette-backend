@@ -10,7 +10,7 @@ db = SQLAlchemy(app)
 from baguette_backend.models import content, post, user
 import users
 # import email_address
-# import post
+import post
 import content
 
 @app.route('/')

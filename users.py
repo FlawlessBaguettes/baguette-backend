@@ -49,7 +49,7 @@ def update_user(user_id):
         user = user_model.User.query.filter_by(id=user_id).first()
         
         username = request.form.get('username')
-        user.username = username if username != None else user.username
+        user_model.username = username if username != None else user_model.username
 
         password = request.form.get('password')
         user.password = password if password != None else user.password

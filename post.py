@@ -1,60 +1,71 @@
 from __main__ import app
-from datetime import date
-
-posts = [
-    {
-        'id': 1,
-        'parentId': 1,
-        'contentId': 1, 
-        'userId': 1,
-        'createdAt': date(2020, 9, 25),
-        'updatedAt': date(2020, 9, 25)
-    }
-]
+from app import db
+from flask import Flask, request, jsonify
+from baguette_backend.models import post as post_model
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
-    return jsonify({'posts': posts})
+    try:
+        posts = post_model.Post.query.all()
+        return jsonify({'posts': [p.serialize() for u in posts]}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
 
-@app.route('/baguette/api/v1.0/post/<int:post_id>', methods=['GET'])
+@app.route('/baguette/api/v1.0/posts/<post_id>', methods=['GET'])
 def get_post(post_id):
-    post = [post for post in posts if post['id'] == post_id]
-    if len(user) == 0:
-        abort(404)
-    return jsonify({'post': post[0]})
+    try:
+        post = post_model.Post.query.filter_by(id=post_id).first()
+        return jsonify({'post': post.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
 
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
-def create_posts():
-    if not request.json or not 'contentId' in request.json:
-        abort(400)
-    post = {
-        'id': users[-1]['id'] + 1,
-        'parentId': request.json['parentId'],
-        'contentId': request.json['contentId'],
-        'userId': request.json['userId'],
-        'createdAt': date.today(),
-        'updatedAt': date.today()
-    }
-    posts.append(post)
-    return jsonify({'post': post}), 201
+def create_post():
+    try:
+        post = post_model_model.Post(
+            parentId = request.form.get('parent_id'),
+            contentId = request.form.get('content_id'),
+            userId = request.form.get('user_id'),
+        )
+        db.session.add(post)
+        db.session.commit()
+        print("Post added post id={}".format(post.id))
+        return jsonify({'post': post.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
 
-@app.route('/baguette/api/v1.0/post/<int:post_id>', methods=['PUT'])
+@app.route('/baguette/api/v1.0/posts/<post_id>', methods=['PUT'])
 def update_post(post_id):
-    post = [post for post in posts if post['id'] == post_id]
-    if len(post) == 0:
-        abort(404)
-    if not request.json:
-        abort(400)
-    if 'contentId' in request.json and type(request.json['contentId']) is not int:
-        abort(400)
-    post[0]['contentId'] = request.json.get('contentId', post[0]['contentId'])
-    post[0]['updatedAt'] = date.today()
-    return jsonify({'post': post[0]})
+    try:
+        post = post_model.Post.query.filter_by(id=post_id).first()
+        
+        parentId = request.form.get('parent_id')
+        post.parentId = parentId if parentId != None else post.parentId
 
-@app.route('/baguette/api/v1.0/posts/<int:post_id>', methods=['DELETE'])
+        contentId = request.form.get('content_id')
+        post.contentId = contentId if contentId != None else post.contentId
+
+        userId = request.form.get('user_id')
+        post.userId = userId if userId != None else post.userId
+        
+        db.session.commit()
+        
+        print("Post updated post id={}".format(post.id))
+        return jsonify({'post': post.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
+
+@app.route('/baguette/api/v1.0/posts/<post_id>', methods=['DELETE'])
 def delete_post(post_id):
-    post = [post for post in posts if post['id'] == post_id]
-    if len(post) == 0:
-        abort(404)
-    posts.remove(post[0])
-    return jsonify({'result': True})
+    try:
+        post = post_model.Post.query.filter_by(id=post_id).first()
+        db.session.delete(post)
+        db.session.commit()
+        return "Post deleted post id={}".format(post.id), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))

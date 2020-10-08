@@ -40,7 +40,7 @@ class User(db.Model):
             'email': self.email,
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'last_name': self.date_of_birth,
+            'date_of_birth': self.date_of_birth,
             'createdAt': self.createdAt,
             'updatedAt': self.updatedAt,
             'deletedAt': self.deletedAt
