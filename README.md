@@ -53,6 +53,10 @@ To download all packages:
 
 `python manage.py db upgrade`
 
+## Run the seeds
+
+`python seeds.py`
+
 ## Launch the application
 
 Launch the application by running `python app.py`.

@@ -23,7 +23,7 @@ def get_post(post_id):
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
     try:
-        post = post_model_model.Post(
+        post = post_model.Post(
             parentId = request.form.get('parent_id'),
             contentId = request.form.get('content_id'),
             userId = request.form.get('user_id'),
