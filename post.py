@@ -1,5 +1,4 @@
-from __main__ import app
-from app import db
+from app import app, db
 from flask import Flask, request, jsonify
 from baguette_backend.models import post as post_model
 
