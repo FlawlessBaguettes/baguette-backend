@@ -14,8 +14,8 @@ Backend of the Baguette social media platform.
 
 ### Download Postgres using Homebrew
 
-`brew update
-brew install postgresql`
+`brew update`
+`brew install postgresql`
 
 ### Creating the database
 
