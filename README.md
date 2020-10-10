@@ -8,39 +8,41 @@ Backend of the Baguette social media platform.
 
 # Setting Up The Database
 
-## Download Homebrew
+### Download Homebrew
 
 ` $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
 
-## Download Postgres using Homebrew
+### Download Postgres using Homebrew
 
 `brew update
 brew install postgresql`
 
-## Creating the database
+### Creating the database
+
+In your terminal run
 
 `createdb flawless_baguettes;`
 
 # Setting Up Environment
 
-## Install virtualenv
+### Install virtualenv
 
 `python -m pip install --user virtualenv`
 
-## Create a virtual environment
+### Create a virtual environment
 
 Go to the projects directory and run the following command
 
 `python -m virtualenv env`
 
-## Activate the virtual environment
+### Activate the virtual environment
 
 `source env/bin/activate`
 
 Note to deactivate run the following command
 `deactivate`
 
-## Downloading packages
+### Downloading packages
 
 To download all packages:
 
@@ -49,15 +51,15 @@ To download all packages:
 
 # Running the Application
 
-## Run the migrations
+### Run the migrations
 
 `python manage.py db upgrade`
 
-## Run the seeds
+### Run the seeds
 
 `python seeds.py`
 
-## Launch the application
+### Launch the application
 
 Launch the application by running `flask run`.
 
