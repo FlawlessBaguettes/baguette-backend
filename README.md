@@ -10,7 +10,7 @@ Backend of the Baguette social media platform.
 
 ### Download Homebrew
 
-` $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
+` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
 
 ### Download Postgres using Homebrew
 
@@ -47,7 +47,6 @@ Note to deactivate run the following command
 To download all packages:
 
 `pip install -r requirements.txt`
-
 
 # Running the Application
 
