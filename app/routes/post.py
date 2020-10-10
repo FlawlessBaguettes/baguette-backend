@@ -1,14 +1,13 @@
-from __main__ import app
-from app import db
+from app import app, db
 from flask import Flask, request, jsonify
-from baguette_backend.models import post as post_model
-from baguette_backend.models import content as content_model
+from app.models import post as post_model
+from app.models import content as content_model
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
     try:
         posts = post_model.Post.query.all()
-        return jsonify({'posts': [p.serialize() for u in posts]}), 201
+        return jsonify({'posts': [p.serialize() for p in posts]}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))

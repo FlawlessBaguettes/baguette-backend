@@ -59,6 +59,6 @@ To download all packages:
 
 ## Launch the application
 
-Launch the application by running `python app.py`.
+Launch the application by running `flask run`.
 
 The application can be accessed `http://localhost:5000`.

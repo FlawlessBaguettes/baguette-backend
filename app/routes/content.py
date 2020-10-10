@@ -1,7 +1,6 @@
-from __main__ import app
-from app import db
+from app import app, db
 from flask import Flask, request, jsonify
-from baguette_backend.models import content as content_model
+from app.models import content as content_model
 
 @app.route('/baguette/api/v1.0/content', methods=['POST'])
 def create_content():

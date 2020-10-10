@@ -1,6 +1,6 @@
 from app import app, db
 from datetime import date
-from baguette_backend.models import content, post, user
+from app.models import content, post, user
 
 # Create User
 try: 
