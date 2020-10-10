@@ -1,6 +1,8 @@
-from app import app, db
+from __main__ import app
+from app import db
 from flask import Flask, request, jsonify
 from baguette_backend.models import post as post_model
+from baguette_backend.models import content as content_model
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -23,9 +25,15 @@ def get_post(post_id):
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
     try:
+        content = content_model.Content(
+            url = request.form.get('url')
+        )
+
+        db.session.add(content)
+
         post = post_model.Post(
             parentId = request.form.get('parent_id'),
-            contentId = request.form.get('content_id'),
+            contentId = content.id,
             userId = request.form.get('user_id'),
         )
         db.session.add(post)

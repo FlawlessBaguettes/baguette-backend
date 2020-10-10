@@ -1,4 +1,5 @@
-from app import app, db
+from __main__ import app
+from app import db
 from datetime import date
 from flask import Flask, request, jsonify
 from baguette_backend.models import user as user_model

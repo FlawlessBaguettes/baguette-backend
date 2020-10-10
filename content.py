@@ -1,4 +1,5 @@
-from app import app, db
+from __main__ import app
+from app import db
 from flask import Flask, request, jsonify
 from baguette_backend.models import content as content_model
 
@@ -31,8 +32,8 @@ def update_content(content_id):
     try:
         content = content_model.Content.query.filter_by(id=content_id).first()
 
-        contentUrl = request.form.get('url')
-        content.contentUrl = contentUrl if contentUrl != None else content.contentUrl
+        url = request.form.get('url')
+        content.url = url if url != None else content.url
         
         db.session.commit()
         print("Content updated content id={}".format(content.id))
