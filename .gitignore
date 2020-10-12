@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 baguette_backend/.DS_Store
 venv/
+.DS_Store
