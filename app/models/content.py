@@ -7,9 +7,8 @@ import uuid
 class Content(db.Model):
     __tablename__ = 'content'
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    url = Column(db.String())
-
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    url = Column(db.String(), nullable=False)
 
     post = db.relationship('Post', backref='content', uselist=False)
 

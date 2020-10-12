@@ -7,7 +7,7 @@ import uuid
 class User(db.Model):
     __tablename__ = 'users'
 
-    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False, primary_key=True, unique=True,)
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False, primary_key=True, unique=True,)
     username = Column(db.String(), nullable=False, unique=True,)
     password = Column(db.String(), nullable=False)
     email = Column(db.String(), nullable=False, unique=True,)
