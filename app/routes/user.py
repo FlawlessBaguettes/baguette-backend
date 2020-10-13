@@ -1,12 +1,12 @@
 from app import app, db
 from datetime import date
 from flask import Flask, request, jsonify
-from app.models import user as user_model
+from app.models.user import User
 
 @app.route('/baguette/api/v1.0/users', methods=['GET'])
 def get_users():
     try:
-        users = user_model.User.query.all()
+        users = User.query.all()
         return jsonify({'users': [u.serialize() for u in users]}), 201
     except Exception as e:
         db.session.rollback()
@@ -15,7 +15,7 @@ def get_users():
 @app.route('/baguette/api/v1.0/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     try:
-        user = user_model.User.query.filter_by(id=user_id).first()
+        user = User.query.filter_by(id=user_id).first()
         return jsonify({'user': user.serialize()}), 201
     except Exception as e:
         db.session.rollback()
@@ -26,7 +26,7 @@ def create_user():
     username = request.form.get('username')
     y, m, d = request.form.get('date_of_birth').split('-')
     try:
-        user = user_model.User(
+        user = User(
             username = username,
             password = request.form.get('password'),
             email = request.form.get('email'),
@@ -45,10 +45,10 @@ def create_user():
 @app.route('/baguette/api/v1.0/users/<user_id>', methods=['PUT'])
 def update_user(user_id):
     try:
-        user = user_model.User.query.filter_by(id=user_id).first()
+        user = User.query.filter_by(id=user_id).first()
         
         username = request.form.get('username')
-        user_model.username = username if username != None else user_model.username
+        user.username = username if username != None else user.username
 
         password = request.form.get('password')
         user.password = password if password != None else user.password
@@ -80,7 +80,7 @@ def update_user(user_id):
 @app.route('/baguette/api/v1.0/users/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
     try:
-        user = user_model.User.query.filter_by(id=user_id).first()
+        user = User.query.filter_by(id=user_id).first()
         db.session.delete(user)
         db.session.commit()
         print("User {} deleted user id={}".format(username, user.id))
