@@ -4,25 +4,11 @@ from app.models.post import Post
 from app.models.content import Content
 from app.models.user import User
 
-
-def serialize(post, content, user):
-    return {
-        'id': post.id,
-        "parentId": post.parentId,
-        'contentId': post.contentId,
-        'userId': post.userId,
-        'createdAt': post.createdAt,
-        'updatedAt': post.updatedAt,
-        'deletedAt': post.deletedAt,
-        'url': content.url,
-        'username': user.username 
-    }
-
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
     try:
         posts = db.session.query(Post, Content, User).join(Content, Content.id == Post.contentId).join(User, User.id == Post.userId).all()
-        return jsonify({'posts': [serialize(p[0], p[1], p[2]) for p in posts]}), 201
+        return jsonify({'posts': [Post.serialize(p[0], p[1], p[2]) for p in posts]}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
@@ -31,7 +17,7 @@ def get_posts():
 def get_post(post_id):
     try:
         post = db.session.query(Post, Content, User).filter_by(id=post_id).join(Content, Content.id == Post.contentId).join(User, User.id == Post.userId).first()
-        return jsonify({'post': serialize(post[0], post[1], post[2])}), 201
+        return jsonify({'post': Post.serialize(post[0], post[1], post[2])}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
