@@ -1,6 +1,6 @@
 from app import app, db
 from flask import Flask, request, jsonify
-from app.models.post import Post
+from app.models.post import Post, serialize
 from app.models.content import Content
 from app.models.user import User
 
@@ -8,7 +8,7 @@ from app.models.user import User
 def get_posts():
     try:
         posts = db.session.query(Post, Content, User).join(Content, Content.id == Post.contentId).join(User, User.id == Post.userId).all()
-        return jsonify({'posts': [Post.serialize(p[0], p[1], p[2]) for p in posts]}), 201
+        return jsonify({'posts': [serialize(p[0], p[1], p[2]) for p in posts]}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
@@ -17,7 +17,7 @@ def get_posts():
 def get_post(post_id):
     try:
         post = db.session.query(Post, Content, User).filter_by(id=post_id).join(Content, Content.id == Post.contentId).join(User, User.id == Post.userId).first()
-        return jsonify({'post': Post.serialize(post[0], post[1], post[2])}), 201
+        return jsonify({'post': serialize(post[0], post[1], post[2])}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))

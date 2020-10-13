@@ -35,15 +35,14 @@ class Post(db.Model):
             'deletedAt': self.deletedAt
         }
 
-    def serialize(post, content, user):
-        return {
-            'id': post.id,
-            "parentId": post.parentId,
-            'contentId': post.contentId,
-            'userId': post.userId,
-            'createdAt': post.createdAt,
-            'updatedAt': post.updatedAt,
-            'deletedAt': post.deletedAt,
-            'url': content.url,
-            'username': user.username 
-        }
+def serialize(post, content, user):
+    return {
+        'id': post.id,
+        "parentId": post.parentId,
+        'contentId': post.contentId,
+        'userId': post.userId,
+        'createdAt': post.createdAt,
+        'updatedAt': post.updatedAt,
+        'url': content.url,
+        'username': user.username 
+    }
