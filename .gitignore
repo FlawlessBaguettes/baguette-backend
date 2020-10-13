@@ -1,2 +1,8 @@
 __pycache__/
 *.py[cod]
+*.DS_STORE
+.DS_Store
+.DS_Store
+baguette_backend/.DS_Store
+venv/
+.DS_Store

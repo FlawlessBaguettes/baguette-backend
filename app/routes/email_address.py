@@ -1,4 +1,5 @@
 from __main__ import app
+from app import db
 from datetime import date
 
 addresses = [
