@@ -50,12 +50,12 @@ def serialize_post(post):
     children = post[1:]
     children_length = len(children)
 
-    serialable = serialize(parent_post[0], parent_post[2], parent_post[3])
+    serialable = serialize(parent_post[0], parent_post[1], parent_post[2])
     serialable['number_of_children'] = children_length
     serialable['children'] = {}
     for i in range(0, children_length):
         child_post = children[i]
-        serialable['children'][str(i)] = serialize(child_post[0], child_post[2], child_post[3])
+        serialable['children'][str(i)] = serialize(child_post[0], child_post[1], child_post[2])
     return serialable
 
 def serialize(post, content, user):

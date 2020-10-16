@@ -32,19 +32,15 @@ def get_posts():
 def get_post(post_id):
     try:
         ParentPost = aliased(Post, name='parent_post')
-        ChildPost = aliased(Post, name='child_post')
-        post = (db.session.query(ParentPost, ChildPost, Content, User)
-                    .outerjoin(
-                        (ChildPost, ChildPost.id == ParentPost.id)
-                    )
-                    .filter(or_(ParentPost.id == post_id, ChildPost.parentId == post_id))
+        post = (db.session.query(ParentPost, Content, User)
+                    .filter(or_(ParentPost.id == post_id, ParentPost.parentId == post_id))
                     .join(
                         (Content, Content.id == ParentPost.contentId),
                         (User, User.id == ParentPost.userId)
                     )
                     .order_by(ParentPost.createdAt.asc())
                 )
-
+        
         return jsonify({'post': serialize_post(post)}), 201
     except Exception as e:
         db.session.rollback()
