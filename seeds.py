@@ -2,7 +2,8 @@ from app import app, db
 from datetime import date
 from app.models import content, post, user
 
-# Create User
+# Create Users
+u = None
 try: 
 	u = user.User(
 			username = 'johndoe',
@@ -16,12 +17,32 @@ try:
 	db.session.commit()
 	print("User added user id={}".format(u.id))
 except Exception as e:
-	db.session.rollback()
-	print(str(e))
+    db.session.rollback()
+    u = user.User.query.first()
+    print(str(e))
 
-u = user.User.query.first()
+u2 = None
+try: 
+    u2 = user.User(
+            username = 'janedoe',
+            password = '12345',
+            email = 'janedoe@gmail.com',
+            first_name = 'Jane',
+            last_name = 'Doe',
+            date_of_birth = date(1991, 1, 1)
+        )
+    db.session.add(u2)
+    db.session.commit()
+    print("User added user id={}".format(u2.id))
+except Exception as e:
+    db.session.rollback()
+    u2 = user.User.query.first()
+    print(str(e))
+
+
 
 # Create Content
+c = None
 try:
     c = content.Content(
         url = 'https://www.youtube.com/watch?v=CtmdUiv_sxs',
@@ -31,22 +52,85 @@ try:
     print("Content added content id={}".format(c.id))
 except Exception as e:
     db.session.rollback()
+    c = content.Content.query.first()
     print(str(e))
 
-c = content.Content.query.first()
+c2 = None
+try:
+    c2 = content.Content(
+        url = 'https://www.youtube.com/watch?v=BGrfhsxxmdE',
+    )
+    db.session.add(c2)
+    db.session.commit()
+    print("Content added content id={}".format(c2.id))
+except Exception as e:
+    db.session.rollback()
+    c2 = content.Content.query.first()
+    print(str(e))
 
 
+# Create Posts
+p = None
 try:
     p = post.Post(
         parentId = None,
         contentId = c.id,
         userId = u.id,
+        title = u.first_name + " " + u.last_name + "'s parent post"
     )
     db.session.add(p)
     db.session.commit()
     print("Post added post id={}".format(p.id))
 except Exception as e:
     db.session.rollback()
+    p = post.Post.query.first()
     print(str(e))
+
+for i in range(5):
+    try:
+        p_1 = post.Post(
+            parentId = p.id,
+            contentId = c.id,
+            userId = u.id,
+            title = u.first_name + " " + u.last_name + "'s child post " + str(i)
+        )
+        db.session.add(p_1)
+        db.session.commit()
+        print("Post added post id={}".format(p_1.id))
+    except Exception as e:
+        db.session.rollback()
+        print(str(e))
+
+
+p2 = None
+try:
+    p2 = post.Post(
+        parentId = None,
+        contentId = c2.id,
+        userId = u2.id,
+        title = u2.first_name + " " + u2.last_name + "'s parent post"
+    )
+    db.session.add(p2)
+    db.session.commit()
+    print("Post added post id={}".format(p2.id))
+except Exception as e:
+    db.session.rollback()
+    p2 = post.Post.query.first()
+    print(str(e))
+
+for i in range(5):
+    try:
+        p_2 = post.Post(
+            parentId = p2.id,
+            contentId = c2.id,
+            userId = u2.id,
+            title = u2.first_name + " " + u2.last_name + "'s child post " + str(i)
+        )
+        db.session.add(p_2)
+        db.session.commit()
+        print("Post added post id={}".format(p_2.id))
+    except Exception as e:
+        db.session.rollback()
+        print(str(e))
 
 

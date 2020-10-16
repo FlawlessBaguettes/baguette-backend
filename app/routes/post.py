@@ -1,14 +1,29 @@
 from app import app, db
 from flask import Flask, request, jsonify
-from app.models.post import Post, serialize
+from sqlalchemy import or_
+from sqlalchemy.orm import aliased
+from app.models.post import Post, serialize, serialize_post
 from app.models.content import Content
 from app.models.user import User
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
     try:
-        posts = db.session.query(Post, Content, User).join(Content, Content.id == Post.contentId).join(User, User.id == Post.userId).all()
-        return jsonify({'posts': [serialize(p[0], p[1], p[2]) for p in posts]}), 201
+        ParentPost = aliased(Post, name='parent_post')
+        ChildPost = aliased(Post, name='child_post')
+        posts = (db.session.query(ParentPost, ChildPost, Content, User)
+                    .filter(ParentPost.parentId == None)
+                    .outerjoin(
+                        (ChildPost, ChildPost.id == ParentPost.id)
+                    )
+                    .join(
+                        (Content, Content.id == ParentPost.contentId),
+                        (User, User.id == ParentPost.userId)
+                    )
+                    .order_by(ParentPost.createdAt.desc())
+                )
+        print(posts)
+        return jsonify({'posts': [serialize_post(p) for p in posts]}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
@@ -16,8 +31,21 @@ def get_posts():
 @app.route('/baguette/api/v1.0/posts/<post_id>', methods=['GET'])
 def get_post(post_id):
     try:
-        post = db.session.query(Post, Content, User).filter_by(id=post_id).join(Content, Content.id == Post.contentId).join(User, User.id == Post.userId).first()
-        return jsonify({'post': serialize(post[0], post[1], post[2])}), 201
+        ParentPost = aliased(Post, name='parent_post')
+        ChildPost = aliased(Post, name='child_post')
+        post = (db.session.query(ParentPost, ChildPost, Content, User)
+                    .outerjoin(
+                        (ChildPost, ChildPost.id == ParentPost.id)
+                    )
+                    .filter(or_(ParentPost.id == post_id, ChildPost.parentId == post_id))
+                    .join(
+                        (Content, Content.id == ParentPost.contentId),
+                        (User, User.id == ParentPost.userId)
+                    )
+                    .order_by(ParentPost.createdAt.asc())
+                )
+
+        return jsonify({'post': serialize_post(post)}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
