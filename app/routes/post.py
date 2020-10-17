@@ -31,7 +31,7 @@ def get_posts():
             post = posts[i]
             json_posts[str(i)] = serialize(post[0], post[1], post[2], post[3])
 
-        return jsonify({'posts': json_posts}), 201
+        return jsonify({'posts': json_posts}), 200
     except Exception as e:
         db.session.rollback()
         return(str(e))
@@ -54,7 +54,7 @@ def get_post(post_id):
                     .order_by(Post.createdAt.desc())
                 ).first()
         
-        return jsonify({'post': serialize(post[0], post[1], post[2], post[3])}), 201
+        return jsonify({'post': serialize(post[0], post[1], post[2], post[3])}), 200
     except Exception as e:
         db.session.rollback()
         return(str(e))
@@ -76,7 +76,7 @@ def get_post_replies(post_id):
                     .filter(Post.parentId == post_id)
                     .order_by(Post.createdAt.desc())
                 ).all()
-        return jsonify({'replies': serialize_replies(replies)}), 201
+        return jsonify({'replies': serialize_replies(replies)}), 200
     except Exception as e:
         db.session.rollback()
         return(str(e))
