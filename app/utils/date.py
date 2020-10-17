@@ -1,23 +1,21 @@
 import datetime
 from math import floor
 def prettydate(d):
-    diff = d - datetime.datetime.utcnow()
+    diff = datetime.datetime.utcnow() - d
     s = diff.seconds
     if diff.days > 7 or diff.days < 0:
         return d.strftime('%d %b %y')
     elif diff.days == 1:
-        return '1 day ago'
+        return '1d'
     elif diff.days > 1:
-        return '{} days ago'.format(diff.days)
-    elif s <= 1:
-        return 'just now'
+        return '{}d'.format(diff.days)
     elif s < 60:
         return '{} seconds ago'.format(s)
     elif s < 120:
-        return '1 minute ago'
+        return '1m'
     elif s < 3600:
-        return '{} minutes ago'.format(floor(s/60))
+        return '{}m'.format(floor(s/60))
     elif s < 7200:
-        return '1 hour ago'
+        return '1h'
     else:
-        return '{} hours ago'.format(floor(s/3600))
+        return '{}h'.format(floor(s/3600))

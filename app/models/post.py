@@ -35,44 +35,44 @@ class Post(db.Model):
     def serialize(self):
         return {
             'id': self.id,
-            "parentId": self.parentId,
-            'contentId': self.contentId,
-            'userId': self.userId,
+            "parent_id": self.parentId,
+            'content_id': self.contentId,
+            'user_id': self.userId,
             'title': self.title,
-            'createdAt': self.createdAt,
-            'updatedAt': self.updatedAt,
-            'deletedAt': self.deletedAt
+            'created_at': self.createdAt,
+            'updated_at': self.updatedAt,
+            'deleted_at': self.deletedAt
         }
 
 
-def serialize_post(post):
-    parent_post = post[0]
-    children = post[1:]
-    children_length = len(children)
+def serialize_replies(replies):
+    number_of_replies = len(replies)
 
-    serialable = serialize(parent_post[0], parent_post[1], parent_post[2])
-    serialable['number_of_children'] = children_length
-    serialable['children'] = {}
-    for i in range(0, children_length):
-        child_post = children[i]
-        serialable['children'][str(i)] = serialize(child_post[0], child_post[1], child_post[2])
+    serialable = {}
+    serialable['number_of_replies'] = number_of_replies
+    serialable['replies'] = {}
+    for i in range(0, number_of_replies):
+        child_post = replies[i]
+        serialable['replies'][str(i)] = serialize(child_post[0], child_post[1], child_post[2], child_post[3])
     return serialable
 
-def serialize(post, content, user):
+def serialize(post, content, user, number_of_replies):
     return {
         'id': post.id,
-        "parentId": post.parentId,
-        'contentId': post.contentId,
-        'userId': post.userId,
+        "parent_id": post.parentId,
         'title': post.title,
-        'url': content.url,
-        'name': {
+        'user': {
             'full_name' : user.first_name + " " + user.last_name,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'username': user.username 
+            'username': user.username,
+            'user_id': post.userId
         },
-        "posted_time": prettydate(post.createdAt),
-        'createdAt': post.createdAt,
-        'updatedAt': post.updatedAt,
+        "content": {
+            'url': content.url,
+            "posted_time": prettydate(post.createdAt)
+        },
+        "number_of_replies": number_of_replies,
+        'created_at': post.createdAt,
+        'updated_at': post.updatedAt,
     }

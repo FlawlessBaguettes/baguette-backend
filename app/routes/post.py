@@ -1,29 +1,37 @@
 from app import app, db
 from flask import Flask, request, jsonify
-from sqlalchemy import or_
 from sqlalchemy.orm import aliased
-from app.models.post import Post, serialize, serialize_post
+from sqlalchemy import distinct, func, over
+from app.models.post import Post, serialize, serialize_replies
 from app.models.content import Content
 from app.models.user import User
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
     try:
-        ParentPost = aliased(Post, name='parent_post')
         ChildPost = aliased(Post, name='child_post')
-        posts = (db.session.query(ParentPost, ChildPost, Content, User)
-                    .filter(ParentPost.parentId == None)
+        posts = (
+                    db.session.query(Post, Content, User, func.count(ChildPost.id).over(partition_by=Post.id).label('replies'))
+                    .distinct()
                     .outerjoin(
-                        (ChildPost, ChildPost.id == ParentPost.id)
+                        (ChildPost, ChildPost.parentId == Post.id)
                     )
                     .join(
-                        (Content, Content.id == ParentPost.contentId),
-                        (User, User.id == ParentPost.userId)
+                        (Content, Content.id == Post.contentId),
+                        (User, User.id == Post.userId)
                     )
-                    .order_by(ParentPost.createdAt.desc())
-                )
-        print(posts)
-        return jsonify({'posts': [serialize_post(p) for p in posts]}), 201
+                    .filter(Post.parentId == None)
+                    .order_by(Post.createdAt.desc())
+                ).all()
+
+        number_of_posts = len(posts)
+
+        json_posts = {}
+        for i in range(number_of_posts):
+            post = posts[i]
+            json_posts[str(i)] = serialize(post[0], post[1], post[2], post[3])
+
+        return jsonify({'posts': json_posts}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
@@ -31,17 +39,44 @@ def get_posts():
 @app.route('/baguette/api/v1.0/posts/<post_id>', methods=['GET'])
 def get_post(post_id):
     try:
-        ParentPost = aliased(Post, name='parent_post')
-        post = (db.session.query(ParentPost, Content, User)
-                    .filter(or_(ParentPost.id == post_id, ParentPost.parentId == post_id))
-                    .join(
-                        (Content, Content.id == ParentPost.contentId),
-                        (User, User.id == ParentPost.userId)
+        ChildPost = aliased(Post, name='child_post')
+        post = (
+                    db.session.query(Post, Content, User, func.count(ChildPost.id).over(partition_by=Post.id).label('replies'))
+                    .distinct()
+                    .outerjoin(
+                        (ChildPost, ChildPost.parentId == Post.id)
                     )
-                    .order_by(ParentPost.createdAt.asc())
-                )
+                    .join(
+                        (Content, Content.id == Post.contentId),
+                        (User, User.id == Post.userId)
+                    )
+                    .filter(Post.id == post_id)
+                    .order_by(Post.createdAt.desc())
+                ).first()
         
-        return jsonify({'post': serialize_post(post)}), 201
+        return jsonify({'post': serialize(post[0], post[1], post[2], post[3])}), 201
+    except Exception as e:
+        db.session.rollback()
+        return(str(e))
+
+@app.route('/baguette/api/v1.0/posts/replies/<post_id>', methods=['GET'])
+def get_post_replies(post_id):
+    try:
+        ChildPost = aliased(Post, name='child_post')
+        replies = (
+                    db.session.query(Post, Content, User, func.count(ChildPost.id).over(partition_by=Post.id).label('replies'))
+                    .distinct()
+                    .outerjoin(
+                        (ChildPost, ChildPost.parentId == Post.id)
+                    )
+                    .join(
+                        (Content, Content.id == Post.contentId),
+                        (User, User.id == Post.userId)
+                    )
+                    .filter(Post.parentId == post_id)
+                    .order_by(Post.createdAt.desc())
+                ).all()
+        return jsonify({'replies': serialize_replies(replies)}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
