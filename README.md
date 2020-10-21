@@ -117,11 +117,21 @@ It will return a list of `posts`, 0-indexed
 
 To get all the replies (immediate children) to a specific post
 
+| Attribute        | Description           | Nullable?  |
+| ------------- |-------------| -----|
+| number_of_posts        | The number of posts returned          | False  |
+| posts        | An array of `posts`          | False  |
+
 ```http
 GET /baguette/api/v1.0/posts/replies/<post_id>
 ```
 
 Where `post_id` is a UUID of a valid post
+
+| Attribute        | Description           | Nullable?  |
+| ------------- |-------------| -----|
+| number_of_replies        | The number of replies for the post           | False  |
+| replies        | An array of `posts`          | False  |
 
 #### Success Reponse
 *Code:* 200
