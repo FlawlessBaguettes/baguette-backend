@@ -111,16 +111,14 @@ GET /baguette/api/v1.0/posts
 #### Success Reponse
 *Code:* 200
 
-It will return a list of `posts`, 0-indexed
-
-### Get Post Replies
-
-To get all the replies (immediate children) to a specific post
-
 | Attribute        | Description           | Nullable?  |
 | ------------- |-------------| -----|
 | number_of_posts        | The number of posts returned          | False  |
 | posts        | An array of `posts`          | False  |
+
+### Get Post Replies
+
+To get all the replies (immediate children) to a specific post
 
 ```http
 GET /baguette/api/v1.0/posts/replies/<post_id>
@@ -128,12 +126,10 @@ GET /baguette/api/v1.0/posts/replies/<post_id>
 
 Where `post_id` is a UUID of a valid post
 
+#### Success Reponse
+*Code:* 200
+
 | Attribute        | Description           | Nullable?  |
 | ------------- |-------------| -----|
 | number_of_replies        | The number of replies for the post           | False  |
 | replies        | An array of `posts`          | False  |
-
-#### Success Reponse
-*Code:* 200
-
-It will return a list of `posts`, 0-indexed
