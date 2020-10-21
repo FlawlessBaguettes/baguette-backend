@@ -44,18 +44,6 @@ class Post(db.Model):
             'deleted_at': self.deletedAt
         }
 
-
-def serialize_replies(replies):
-    number_of_replies = len(replies)
-
-    serialable = {}
-    serialable['number_of_replies'] = number_of_replies
-    serialable['replies'] = {}
-    for i in range(0, number_of_replies):
-        child_post = replies[i]
-        serialable['replies'][str(i)] = serialize(child_post[0], child_post[1], child_post[2], child_post[3])
-    return serialable
-
 def serialize(post, content, user, number_of_replies):
     return {
         'id': post.id,
@@ -76,3 +64,29 @@ def serialize(post, content, user, number_of_replies):
         'created_at': post.createdAt,
         'updated_at': post.updatedAt,
     }
+
+
+def serialize_posts(posts):
+    serialable = {}
+    number_of_posts = len(posts)
+    serialable['number_of_posts'] = number_of_posts
+
+    serialized_posts = []
+    for i in range(number_of_posts):
+        post = posts[i]
+        serialized_posts.append(serialize(post[0], post[1], post[2], post[3]))
+
+    serialable['posts'] = serialized_posts
+    return serialable
+
+
+def serialize_replies(replies):
+    number_of_replies = len(replies)
+
+    serialable = {}
+    serialable['number_of_replies'] = number_of_replies
+    serialable['replies'] = []
+    for i in range(0, number_of_replies):
+        child_post = replies[i]
+        serialable['replies'].append(serialize(child_post[0], child_post[1], child_post[2], child_post[3]))
+    return serialable

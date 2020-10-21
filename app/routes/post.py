@@ -2,7 +2,7 @@ from app import app, db
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
-from app.models.post import Post, serialize, serialize_replies
+from app.models.post import Post, serialize, serialize_posts, serialize_replies
 from app.models.content import Content
 from app.models.user import User
 
@@ -24,14 +24,7 @@ def get_posts():
                     .order_by(Post.createdAt.desc())
                 ).all()
 
-        number_of_posts = len(posts)
-
-        json_posts = {}
-        for i in range(number_of_posts):
-            post = posts[i]
-            json_posts[str(i)] = serialize(post[0], post[1], post[2], post[3])
-
-        return jsonify({'posts': json_posts}), 200
+        return jsonify({'posts': serialize_posts(posts)}), 200
     except Exception as e:
         db.session.rollback()
         return(str(e))
