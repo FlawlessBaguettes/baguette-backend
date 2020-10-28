@@ -1,11 +1,11 @@
 from app import app, db
 from flask import Flask, request, jsonify
-from app.models import content as content_model
+from app.models.content import Content
 
 @app.route('/baguette/api/v1.0/content', methods=['POST'])
 def create_content():
     try:
-        content = content_model.Content(
+        content = Content(
             url = request.form.get('url'),
         )
         db.session.add(content)
@@ -19,7 +19,7 @@ def create_content():
 @app.route('/baguette/api/v1.0/content/<content_id>', methods=['GET'])
 def get_content(content_id):
     try:
-        content = content_model.Content.query.filter_by(id=content_id).first()
+        content = Content.query.filter_by(id=content_id).first()
         return jsonify({'content': content.serialize()}), 201
     except Exception as e:
         db.session.rollback()
@@ -29,7 +29,7 @@ def get_content(content_id):
 @app.route('/baguette/api/v1.0/content/<content_id>', methods=['PUT'])
 def update_content(content_id):
     try:
-        content = content_model.Content.query.filter_by(id=content_id).first()
+        content = Content.query.filter_by(id=content_id).first()
 
         url = request.form.get('url')
         content.url = url if url != None else content.url
@@ -44,7 +44,7 @@ def update_content(content_id):
 @app.route('/baguette/api/v1.0/content/<content_id>', methods=['DELETE'])
 def delete_content(content_id):
     try:
-        content = content_model.Content.query.filter_by(id=content_id).first()
+        content = Content.query.filter_by(id=content_id).first()
         db.session.delete(content)
         db.session.commit()
         return "Content deleted content id={}".format(content.id), 201
