@@ -1,10 +1,14 @@
-from app import app, db
-from flask import Flask, request, jsonify
+from flask import abort, Flask, jsonify, request
+import os
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
+from werkzeug.utils import secure_filename
+
+from app import app, db
 from app.models.post import Post, serialize, serialize_posts, serialize_replies
 from app.models.content import Content
 from app.models.user import User
+from app.utils.video import validate_video
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -27,7 +31,7 @@ def get_posts():
         return jsonify({'posts': serialize_posts(posts)}), 200
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        return str(e)
 
 @app.route('/baguette/api/v1.0/posts/<post_id>', methods=['GET'])
 def get_post(post_id):
@@ -50,7 +54,7 @@ def get_post(post_id):
         return jsonify({'post': serialize(post[0], post[1], post[2], post[3])}), 200
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        return str(e)
 
 @app.route('/baguette/api/v1.0/posts/replies/<post_id>', methods=['GET'])
 def get_post_replies(post_id):
@@ -72,7 +76,7 @@ def get_post_replies(post_id):
         return jsonify({'replies': serialize_replies(replies)}), 200
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        return str(e)
 
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
@@ -94,7 +98,21 @@ def create_post():
         return jsonify({'post': post.serialize()}), 201
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        return str(e)
+
+@app.route('/baguette/api/v1.0/posts/upload', methods=['POST'])
+def upload_post():
+    try:
+        uploaded_video = request.files['video']
+        filename = secure_filename(uploaded_video.filename)
+        if filename != '':
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
+                abort(400)
+            uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+        return "Successfully uploaded video", 201
+    except Exception as e:
+        return str(e)
 
 @app.route('/baguette/api/v1.0/posts/<post_id>', methods=['PUT'])
 def update_post(post_id):
@@ -116,7 +134,7 @@ def update_post(post_id):
         return jsonify({'post': post.serialize()}), 201
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        return str(e)
 
 @app.route('/baguette/api/v1.0/posts/<post_id>', methods=['DELETE'])
 def delete_post(post_id):
@@ -127,4 +145,4 @@ def delete_post(post_id):
         return "Post deleted post id={}".format(post.id), 201
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        return str(e)
