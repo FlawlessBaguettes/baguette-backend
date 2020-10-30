@@ -81,35 +81,46 @@ def get_post_replies(post_id):
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
     try:
-        content = Content(
-            url = request.form.get('url')
-        )
 
-        db.session.add(content)
-
-        post = Post(
-            parentId = request.form.get('parent_id'),
-            contentId = content.id,
-            userId = request.form.get('user_id'),
-        )
-        db.session.add(post)
-        db.session.commit()
-        print("Post added post id={}".format(post.id))
-        return jsonify({'post': post.serialize()}), 201
-    except Exception as e:
-        db.session.rollback()
-        return str(e)
-
-@app.route('/baguette/api/v1.0/posts/upload', methods=['POST'])
-def upload_post():
-    try:
+        # Retrieve and validate uploaded video
         uploaded_video = request.files['video']
         filename = secure_filename(uploaded_video.filename)
         if filename != '':
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
+            # TODO: This saves, the uploaded video, instead we want to upload it to YouTube
             uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+
+        # TODO: Create a content record based on the URL retrieved from YouTube
+        '''
+        content = Content(
+            url = request.form.get('url')
+        )
+
+        db.session.add(content)
+        '''
+
+        # TODO: Create the post record
+        '''
+        post = Post(
+            parentId = request.form.get('parent_id'),
+            TODO: Uncomment when content record is set
+            contentId = content.id,
+            title = #TODO: Add title
+            userId = request.form.get('user_id'),
+        )
+        '''
+
+
+        # TODO: Commit the Post Record to the DB
+        '''
+        db.session.add(post)
+        db.session.commit()
+        print("Post added post id={}".format(post.id))
+        return jsonify({'post': post.serialize()}), 201
+        '''
+
         return "Successfully uploaded video", 201
     except Exception as e:
         return str(e)

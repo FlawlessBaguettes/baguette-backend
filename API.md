@@ -68,18 +68,18 @@ Where `post_id` is a UUID of a valid post
 | number_of_replies        | The number of replies for the post           | False  |
 | replies        | An array of `posts`          | False  |
 
-### Upload Post Video
+### Create Post
 
-*Note:* This is a temporary (WIP) endpoint 
-
-To upload a video
+To create a post 
 
 ```http
-POST /baguette/api/v1.0/posts/upload
+POST /baguette/api/v1.0/posts
 ```
 
 ### Body
 `video`: A mp4, mov, wmv, or avi file of maximum size of 10 MB
+`user_id`: The UUID user ID of the poster 
+`parent_id`: The UUID of the immediate parent post for the post being created
 
 #### Success Reponse
 *Code:* 201
