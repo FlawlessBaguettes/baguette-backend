@@ -6,7 +6,13 @@ class Config(object):
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = 'this-really-needs-to-be-changed'
+
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    MAX_CONTENT_LENGTH = 1024 * 1024 * 10
+    UPLOAD_EXTENSIONS = ['.mp4', '.mov', '.wmv', '.avi']
+    UPLOAD_PATH = 'uploads'
 
 
 class ProductionConfig(Config):
