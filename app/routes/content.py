@@ -1,6 +1,7 @@
 from app import app, db
 from flask import Flask, request, jsonify
 from app.models.content import Content
+from youtube.upload import upload_content
 
 @app.route('/baguette/api/v1.0/content', methods=['POST'])
 def create_content():
@@ -8,6 +9,8 @@ def create_content():
         content = Content(
             url = request.form.get('url'),
         )
+        upload_content(request.form.get('title'), content.url)
+
         db.session.add(content)
         db.session.commit()
         print("Content added content id={}".format(content.id))
