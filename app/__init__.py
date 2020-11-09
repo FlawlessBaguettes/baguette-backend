@@ -37,7 +37,6 @@ def create_app():
 
     return app
 
-
 app = create_app()
 
 if not os.path.exists(app.config['UPLOAD_PATH']):
