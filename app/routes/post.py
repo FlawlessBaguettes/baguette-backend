@@ -90,6 +90,7 @@ def create_post():
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
             # TODO: This saves, the uploaded video, instead we want to upload it to YouTube
+            uploaded_video.seek(0)
             uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
         # TODO: Create a content record based on the URL retrieved from YouTube

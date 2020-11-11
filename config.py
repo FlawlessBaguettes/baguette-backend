@@ -10,7 +10,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    MAX_CONTENT_LENGTH = 1024 * 1024 * 10
+    MAX_CONTENT_LENGTH = 1024 * 1024 * 50
     UPLOAD_EXTENSIONS = ['.mp4', '.mov', '.wmv', '.avi']
     UPLOAD_PATH = 'uploads'
 
