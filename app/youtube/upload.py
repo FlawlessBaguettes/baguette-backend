@@ -127,9 +127,9 @@ def resumable_upload(request):
       print 'Sleeping %f seconds and then retrying...' % sleep_seconds
       time.sleep(sleep_seconds)
 
-def upload_content(title, url):
+def upload_content(title, filepath):
     options = {
-        '--file': url,
+        '--file': filepath,
         '--title': title,
         '--description': 'Baguette upload',
         '--category': '22',

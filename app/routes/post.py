@@ -5,6 +5,7 @@ from sqlalchemy import distinct, func, over
 from app.models.post import Post, serialize, serialize_posts, serialize_replies
 from app.models.content import Content
 from app.models.user import User
+from youtube.upload import upload_content
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -77,6 +78,8 @@ def get_post_replies(post_id):
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
     try:
+        # TO DO: Upload video to Youtube and create content using resulting URL
+        # youtube_url = upload_content(request.form.get('title'), filepath)
         content = Content(
             url = request.form.get('url')
         )
