@@ -9,6 +9,7 @@ from app.models.post import Post, serialize, serialize_posts, serialize_replies
 from app.models.content import Content
 from app.models.user import User
 from app.utils.video import validate_video
+from app.youtube.upload import upload_content
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -81,15 +82,20 @@ def get_post_replies(post_id):
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
     try:
-
         # Retrieve and validate uploaded video
         uploaded_video = request.files['video']
         filename = secure_filename(uploaded_video.filename)
+
+        print("RG - uploaded_video")
+        print(uploaded_video)
+        print("RG - filename")
+
         if filename != '':
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
             # TODO: This saves, the uploaded video, instead we want to upload it to YouTube
+            
             uploaded_video.seek(0)
             uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
