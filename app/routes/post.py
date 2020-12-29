@@ -97,38 +97,39 @@ def create_post():
             video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
             uploaded_video.save(video_path)
 
-            flask.redirect(flask.url_for('upload_to_youtube', _external=True))
+            flask.redirect(flask.url_for('upload_to_youtube'))
 
-        # TODO: Create a content record based on the URL retrieved from YouTube
-        '''
-        content = Content(
-            url = request.form.get('url')
-        )
+            # TODO: Create a content record based on the URL retrieved from YouTube
+            '''
+            content = Content(
+                url = request.form.get('url')
+            )
 
-        db.session.add(content)
-        '''
+            db.session.add(content)
+            '''
 
-        # TODO: Create the post record
-        '''
-        post = Post(
-            parentId = request.form.get('parent_id'),
-            TODO: Uncomment when content record is set
-            contentId = content.id,
-            title = #TODO: Add title
-            userId = request.form.get('user_id'),
-        )
-        '''
+            # TODO: Create the post record
+            '''
+            post = Post(
+                parentId = request.form.get('parent_id'),
+                TODO: Uncomment when content record is set
+                contentId = content.id,
+                title = #TODO: Add title
+                userId = request.form.get('user_id'),
+            )
+            '''
 
+            # TODO: Commit the Post Record to the DB
+            '''
+            db.session.add(post)
+            db.session.commit()
+            print("Post added post id={}".format(post.id))
+            return jsonify({'post': post.serialize()}), 201
+            '''
 
-        # TODO: Commit the Post Record to the DB
-        '''
-        db.session.add(post)
-        db.session.commit()
-        print("Post added post id={}".format(post.id))
-        return jsonify({'post': post.serialize()}), 201
-        '''
-
-        return "Successfully uploaded video", 201
+            return "Successfully uploaded video", 201
+        else:
+            return "Failed to upload video", 400
     except Exception as e:
         return str(e)
 
