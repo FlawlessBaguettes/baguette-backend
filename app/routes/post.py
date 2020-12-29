@@ -125,8 +125,8 @@ def create_post():
             video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
             uploaded_video.save(video_path)
 
-            url_test = flask.url_for("test_api_request", _external=True)
-            flask.redirect(url_test)
+            youtube_upload = flask.url_for("upload_to_youtube", _external=True)
+            flask.redirect(youtube_upload)
 
         # TODO: Create a content record based on the URL retrieved from YouTube
         '''
@@ -194,10 +194,10 @@ def delete_post(post_id):
         db.session.rollback()
         return str(e)
 
-@app.route('/test_api_request', methods=["GET", "POST"])
-def test_api_request():
+@app.route('/upload_to_youtube', methods=["GET", "POST"])
+def upload_to_youtube():
   if 'credentials' not in flask.session:
-    return flask.redirect(url_test)
+    return flask.redirect('authorize')
 
   # Load credentials from the session.
   credentials = google.oauth2.credentials.Credentials(
@@ -277,7 +277,7 @@ def oauth2callback():
   credentials = flow.credentials
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.redirect(flask.url_for('test_api_request'))
+  return flask.redirect(flask.url_for('upload_to_youtube'))
 
 def credentials_to_dict(credentials):
   return {'token': credentials.token,
