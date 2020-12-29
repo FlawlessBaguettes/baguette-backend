@@ -1,6 +1,8 @@
 import os
 import flask
 import requests
+import http.client
+import httplib2
 from app import app
 
 import google.oauth2.credentials
@@ -28,6 +30,23 @@ app.secret_key = 'cbE3o9GN9bjmBbh2HLLnSl0Q'
 # ACTION ITEM for developers:
 #     When running in production *do not* leave this option enabled.
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+# Explicitly tell the underlying HTTP transport library not to retry, since
+# we are handling retry logic ourselves.
+httplib2.RETRIES = 1
+
+# Maximum number of times to retry before giving up.
+MAX_RETRIES = 10
+
+# Always retry when these exceptions are raised.
+RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, http.client.NotConnected,
+	http.client.IncompleteRead, http.client.ImproperConnectionState,
+	http.client.CannotSendRequest, http.client.CannotSendHeader,
+	http.client.ResponseNotReady, http.client.BadStatusLine)
+
+# Always retry when an apiclient.errors.HttpError with one of these status
+# codes is raised.
+RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 
 @app.route('/upload_to_youtube')
 def upload_to_youtube():
@@ -59,14 +78,50 @@ def upload_to_youtube():
 		body=body,
 		media_body=MediaFileUpload("uploads/767DC8EE-0379-415B-9BAD-2B251B1BFEBF.mov", chunksize=-1, resumable=True)
 	)
-	response = insert_request.execute()
+	# response = insert_request.execute()
+	video_ID = resumable_upload(insert_request)
 
 	# Save credentials back to session in case access token was refreshed.
 	# ACTION ITEM: In a production app, you likely want to save these
 	#              credentials in a persistent database instead.
 	flask.session['credentials'] = credentials_to_dict(credentials)
 
-	return flask.jsonify(**response)
+	return video_ID
+
+# This method implements an exponential backoff strategy to resume a
+# failed upload.
+def resumable_upload(request):
+	response = None
+	error = None
+	retry = 0
+	while response is None:
+		try:
+			print('Uploading file...')
+			status, response = request.next_chunk()
+			if response is not None:
+				if 'id' in response:
+					print('Video id "%s" was successfully uploaded.' % response['id'])
+					return response['id']
+				else:
+					exit('The upload failed with an unexpected response: %s' % response)
+		except HttpError as e:
+			if e.resp.status in RETRIABLE_STATUS_CODES:
+				error = 'A retriable HTTP error %d occurred:\n%s' % (e.resp.status, e.content)
+			else:
+				raise
+		except RETRIABLE_EXCEPTIONS as e:
+			error = 'A retriable error occurred: %s' % e
+
+		if error is not None:
+			print(error)
+			retry += 1
+			if retry > MAX_RETRIES:
+				exit('No longer attempting to retry.')
+
+			max_sleep = 2 ** retry
+			sleep_seconds = random.random() * max_sleep
+			print('Sleeping %f seconds and then retrying...' % sleep_seconds)
+			time.sleep(sleep_seconds)
 
 @app.route('/authorize')
 def authorize():
