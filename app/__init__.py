@@ -46,6 +46,7 @@ db = SQLAlchemy(app)
 
 from app.models import models
 from app.routes import routes
+from app.utils.youtube import upload
 
 if __name__ == '__main__':
     app.run()
