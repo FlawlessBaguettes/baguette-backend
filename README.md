@@ -64,4 +64,6 @@ Launch the application by running `flask run`.
 
 The application can be accessed `http://localhost:5000`.
 
-NOTE: To use ngrok for local tunelling, run the command `flask run --no-reload`. This will then generate a random URL that exposes the local development server on the internet
+NOTE: To use ngrok for local tunelling, run the command `flask run --no-reload`. This will then generate a random URL that exposes the local development server on the internet.
+
+NOTE: Currently, to use the Youtube Data API, the ngrok URL must be used to generate a new client secret in the Google Developer Console.
