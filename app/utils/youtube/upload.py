@@ -21,11 +21,6 @@ SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl', "https://www.goog
 API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
 
-# Note: A secret key is included in the sample so that it works.
-# If you use this code in your application, replace this with a truly secret
-# key. See https://flask.palletsprojects.com/quickstart/#sessions.
-app.secret_key = 'cbE3o9GN9bjmBbh2HLLnSl0Q'
-
 # When running locally, disable OAuthlib's HTTPs verification.
 # ACTION ITEM for developers:
 #     When running in production *do not* leave this option enabled.
@@ -78,15 +73,14 @@ def upload_to_youtube():
 		body=body,
 		media_body=MediaFileUpload("uploads/767DC8EE-0379-415B-9BAD-2B251B1BFEBF.mov", chunksize=-1, resumable=True)
 	)
-	# response = insert_request.execute()
-	video_ID = resumable_upload(insert_request)
+	resumable_upload(insert_request)
 
 	# Save credentials back to session in case access token was refreshed.
 	# ACTION ITEM: In a production app, you likely want to save these
 	#              credentials in a persistent database instead.
 	flask.session['credentials'] = credentials_to_dict(credentials)
 
-	return video_ID
+	return "Successfully uploaded video", 201
 
 # This method implements an exponential backoff strategy to resume a
 # failed upload.
@@ -101,7 +95,6 @@ def resumable_upload(request):
 			if response is not None:
 				if 'id' in response:
 					print('Video id "%s" was successfully uploaded.' % response['id'])
-					return response['id']
 				else:
 					exit('The upload failed with an unexpected response: %s' % response)
 		except HttpError as e:

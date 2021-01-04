@@ -1,4 +1,4 @@
-from flask import abort, Flask, jsonify, request
+from flask import abort, Flask, jsonify, request, url_for, redirect
 import os
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
@@ -97,8 +97,6 @@ def create_post():
             video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
             uploaded_video.save(video_path)
 
-            flask.redirect(flask.url_for('upload_to_youtube'))
-
             # TODO: Create a content record based on the URL retrieved from YouTube
             '''
             content = Content(
@@ -127,7 +125,7 @@ def create_post():
             return jsonify({'post': post.serialize()}), 201
             '''
 
-            return "Successfully uploaded video", 201
+            return redirect(url_for('upload_to_youtube'))
         else:
             return "Failed to upload video", 400
     except Exception as e:
