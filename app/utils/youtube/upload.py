@@ -17,7 +17,7 @@ CLIENT_SECRETS_FILE = "client_secret.json"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
-SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl', "https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
 
@@ -43,7 +43,7 @@ RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, http.client.NotConnecte
 # codes is raised.
 RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 
-@app.route('/upload_to_youtube')
+@app.route('/baguette/api/v1.0/upload_to_youtube')
 def upload_to_youtube():
 	if 'credentials' not in flask.session:
 		return flask.redirect('authorize')
@@ -55,9 +55,12 @@ def upload_to_youtube():
 	youtube = googleapiclient.discovery.build(
 		API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
+	title = request.args['title'] if not None else "Sample Title"
+	video = request.args['video'] if not None else "uploads/0E0B2A0F-A1C8-409B-B907-10506737AEE2.mov"
+
 	body=dict(
 		snippet=dict(
-			title="My Video",
+			title=title,
 			description="Video uploaded by Flawless Baguettes",
 			tags=["Flawless, Baguettes"],
 			categoryId="22"
@@ -71,7 +74,7 @@ def upload_to_youtube():
 	insert_request = youtube.videos().insert(
 		part=','.join(list(body.keys())),
 		body=body,
-		media_body=MediaFileUpload("uploads/767DC8EE-0379-415B-9BAD-2B251B1BFEBF.mov", chunksize=-1, resumable=True)
+		media_body=MediaFileUpload(video, chunksize=-1, resumable=True)
 	)
 	resumable_upload(insert_request)
 
@@ -88,9 +91,9 @@ def resumable_upload(request):
 	response = None
 	error = None
 	retry = 0
+	print('Uploading file...')
 	while response is None:
 		try:
-			print('Uploading file...')
 			status, response = request.next_chunk()
 			if response is not None:
 				if 'id' in response:
@@ -116,7 +119,7 @@ def resumable_upload(request):
 			print('Sleeping %f seconds and then retrying...' % sleep_seconds)
 			time.sleep(sleep_seconds)
 
-@app.route('/authorize')
+@app.route('/baguette/api/v1.0/authorize')
 def authorize():
 	# Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
 	flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -140,7 +143,7 @@ def authorize():
 
 	return flask.redirect(authorization_url)
 
-@app.route('/oauth2callback')
+@app.route('/baguette/api/v1.0/oauth2callback')
 def oauth2callback():
 	# Specify the state when creating the flow in the callback so that it can
 	# verified in the authorization server response.
