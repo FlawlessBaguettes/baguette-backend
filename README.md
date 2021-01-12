@@ -75,6 +75,13 @@ Login by entering the following in the terminal followed by Flawless Baguettes' 
 
 `heroku login`
 
+Add a Procfile to the project with the following 2 lines:
+
+```
+web: gunicorn app:app
+release: python manage.py db upgrade
+```
+
 When you're ready to deploy the master branch to Heroku enter:
 
 `git push Heroku master`
