@@ -1,10 +1,11 @@
 # baguette-backend
+
 Backend of the Baguette social media platform.
 
 # Prerequisites
 
-* `python 3`
-* `pip version >= 19.0`
+- `python 3`
+- `pip version >= 19.0`
 
 # Setting Up The Database
 
@@ -64,6 +65,20 @@ Launch the application by running `flask run`.
 
 The application can be accessed `http://localhost:5000`.
 
-NOTE: To use ngrok for local tunelling, run the command `flask run --no-reload`. This will then generate a random URL that exposes the local development server on the internet.
+NOTE: To use ngrok for local tunelling, run the command `flask run --no-reload`. This will then generate a random URL that exposes the local development server on the internet
 
-NOTE: Currently, to use the Youtube Data API, the ngrok URL must be used to generate a new client secret in the Google Developer Console.
+# Deploying to Heroku
+
+Download the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
+
+Login by entering the following in the terminal followed by Flawless Baguettes' login credentials.
+
+`heroku login`
+
+When you're ready to deploy the master branch to Heroku enter:
+
+`git push Heroku master`
+
+Note: Use `git push Heroku <branch-name>:main` to deploy from a feature branch.
+
+Visit https://flawless-baguettes.herokuapp.com/ to view and test your changes. If you encounter an "Application Error" at the target URL, run `heroku logs --tail` to view the corresponding logs.
