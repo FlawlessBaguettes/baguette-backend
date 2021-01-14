@@ -56,7 +56,7 @@ def upload_to_youtube():
 		API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 	title = request.args['title'] if not None else "Sample Title"
-	video = request.args['video'] if not None else "uploads/0E0B2A0F-A1C8-409B-B907-10506737AEE2.mov"
+	video = request.args['video'] if not None else ""
 
 	body=dict(
 		snippet=dict(
