@@ -1,4 +1,4 @@
-from flask import abort, Flask, jsonify, request
+from flask import abort, Flask, jsonify, request, url_for, redirect
 import os
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
@@ -9,6 +9,7 @@ from app.models.post import Post, serialize, serialize_posts, serialize_replies
 from app.models.content import Content
 from app.models.user import User
 from app.utils.video import validate_video
+from app.utils.youtube import upload
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -81,48 +82,46 @@ def get_post_replies(post_id):
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
     try:
-
         # Retrieve and validate uploaded video
         uploaded_video = request.files['video']
         filename = secure_filename(uploaded_video.filename)
+
         if filename != '':
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
-            # TODO: This saves, the uploaded video, instead we want to upload it to YouTube
-            uploaded_video.seek(0)
-            uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
-        # TODO: Create a content record based on the URL retrieved from YouTube
-        '''
-        content = Content(
-            url = request.form.get('url')
-        )
+            # TODO: Create a content record based on the URL retrieved from YouTube
+            '''
+            content = Content(
+                url = request.form.get('url')
+            )
 
-        db.session.add(content)
-        '''
+            db.session.add(content)
+            '''
 
-        # TODO: Create the post record
-        '''
-        post = Post(
-            parentId = request.form.get('parent_id'),
-            TODO: Uncomment when content record is set
-            contentId = content.id,
-            title = #TODO: Add title
-            userId = request.form.get('user_id'),
-        )
-        '''
+            # TODO: Create the post record
+            '''
+            post = Post(
+                parentId = request.form.get('parent_id'),
+                TODO: Uncomment when content record is set
+                contentId = content.id,
+                title = #TODO: Add title
+                userId = request.form.get('user_id'),
+            )
+            '''
 
-
-        # TODO: Commit the Post Record to the DB
-        '''
-        db.session.add(post)
-        db.session.commit()
-        print("Post added post id={}".format(post.id))
-        return jsonify({'post': post.serialize()}), 201
-        '''
-
-        return "Successfully uploaded video", 201
+            # TODO: Commit the Post Record to the DB
+            '''
+            db.session.add(post)
+            db.session.commit()
+            print("Post added post id={}".format(post.id))
+            return jsonify({'post': post.serialize()}), 201
+            '''
+            video_title = request.form.get('title')
+            return redirect(url_for('upload_to_youtube', video=video_path, title=video_title))
+        else:
+            return "Failed to upload video", 400
     except Exception as e:
         return str(e)
 
