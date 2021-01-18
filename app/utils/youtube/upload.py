@@ -4,6 +4,7 @@ import requests
 import http.client
 import httplib2
 from app import app
+from werkzeug.utils import secure_filename
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -55,8 +56,15 @@ def upload_to_youtube():
 	youtube = googleapiclient.discovery.build(
 		API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
+	uploaded_video = request.files['video']
+	filename = secure_filename(uploaded_video.filename)
+	
+	video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
+
+	if not video_path:
+		return "Missing video file for upload", 400
+
 	title = request.args['title'] if not None else "Sample Title"
-	video = request.args['video'] if not None else ""
 
 	body=dict(
 		snippet=dict(
@@ -74,7 +82,7 @@ def upload_to_youtube():
 	insert_request = youtube.videos().insert(
 		part=','.join(list(body.keys())),
 		body=body,
-		media_body=MediaFileUpload(video, chunksize=-1, resumable=True)
+		media_body=MediaFileUpload(video_path, chunksize=-1, resumable=True)
 	)
 	resumable_upload(insert_request)
 
