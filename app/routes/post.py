@@ -118,6 +118,12 @@ def create_post():
             print("Post added post id={}".format(post.id))
             return jsonify({'post': post.serialize()}), 201
             '''
+            # TODO: This saves, the uploaded video, instead we want to upload it to YouTube
+            uploaded_video.seek(0)
+            
+            video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
+            uploaded_video.save(video_path)
+
             video_title = request.form.get('title')
             return redirect(url_for('upload_to_youtube', video=video_path, title=video_title))
         else:
