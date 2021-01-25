@@ -12,13 +12,16 @@ import googleapiclient.discovery
 
 from googleapiclient.http import MediaFileUpload
 
+from werkzeug.utils import secure_filename
+from app.utils.video import validate_video
+
 # This variable specifies the name of a file that contains the OAuth 2.0
 # information for this application, including its client_id and client_secret.
 CLIENT_SECRETS_FILE = "client_secret.json"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl', "https://www.googleapis.com/auth/youtube.upload"]
 API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
 
@@ -56,15 +59,22 @@ def upload_to_youtube():
 	youtube = googleapiclient.discovery.build(
 		API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-	uploaded_video = request.files['video']
-	filename = secure_filename(uploaded_video.filename)
+	title = "Flawless Baguettes Video" if flask.request.form.get('title') is None else flask.request.form.get('title')
+
+	uploaded_video = flask.request.files.get('video')
+	if uploaded_video:
+		filename = secure_filename(uploaded_video.filename)
+
+		if filename != '':
+			file_ext = os.path.splitext(filename)[1]
+			if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
+				abort(400)
 	
-	video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
-
-	if not video_path:
-		return "Missing video file for upload", 400
-
-	title = request.args['title'] if not None else "Sample Title"
+			video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
+	else:
+		video_path = "uploads/0E0B2A0F-A1C8-409B-B907-10506737AEE2.mov"
+	
+	print("Uploading the video {} at the location: {}".format(title, video_path))
 
 	body=dict(
 		snippet=dict(
@@ -84,28 +94,29 @@ def upload_to_youtube():
 		body=body,
 		media_body=MediaFileUpload(video_path, chunksize=-1, resumable=True)
 	)
-	resumable_upload(insert_request)
+	uploaded_video_id = resumable_upload(insert_request)
 
 	# Save credentials back to session in case access token was refreshed.
 	# ACTION ITEM: In a production app, you likely want to save these
 	#              credentials in a persistent database instead.
 	flask.session['credentials'] = credentials_to_dict(credentials)
 
-	return "Successfully uploaded video", 201
+	return uploaded_video_id, 201
 
 # This method implements an exponential backoff strategy to resume a
 # failed upload.
-def resumable_upload(request):
+def resumable_upload(yt_request):
 	response = None
 	error = None
 	retry = 0
 	print('Uploading file...')
 	while response is None:
 		try:
-			status, response = request.next_chunk()
+			status, response = yt_request.next_chunk()
 			if response is not None:
 				if 'id' in response:
 					print('Video id "%s" was successfully uploaded.' % response['id'])
+					return response['id']
 				else:
 					exit('The upload failed with an unexpected response: %s' % response)
 		except HttpError as e:
