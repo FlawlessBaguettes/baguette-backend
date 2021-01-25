@@ -3,6 +3,7 @@ from datetime import date
 from flask import Flask, request, jsonify
 from app.models.user import User
 
+
 @app.route('/baguette/api/v1.0/users', methods=['GET'])
 def get_users():
     try:
@@ -11,6 +12,7 @@ def get_users():
     except Exception as e:
         db.session.rollback()
         return(str(e))
+
 
 @app.route('/baguette/api/v1.0/users/<user_id>', methods=['GET'])
 def get_user(user_id):
@@ -21,18 +23,21 @@ def get_user(user_id):
         db.session.rollback()
         return(str(e))
 
+
 @app.route('/baguette/api/v1.0/users', methods=['POST'])
 def create_user():
-    username = request.form.get('username')
-    y, m, d = request.form.get('date_of_birth').split('-')
+
+    userInfo = request.get_json()
+    y, m, d = userInfo['date_of_birth'].split('T')[0].split('-')
+
     try:
         user = User(
-            username = username,
-            password = request.form.get('password'),
-            email = request.form.get('email'),
-            first_name = request.form.get('first_name'),
-            last_name = request.form.get('last_name'),
-            date_of_birth = date(int(y), int(m), int(d))
+            username=userInfo['username'],
+            password=userInfo['password'],
+            email=userInfo['email'],
+            first_name=userInfo['first_name'],
+            last_name=userInfo['last_name'],
+            date_of_birth=date(int(y), int(m), int(d))
         )
         db.session.add(user)
         db.session.commit()
@@ -42,11 +47,12 @@ def create_user():
         db.session.rollback()
         return(str(e))
 
+
 @app.route('/baguette/api/v1.0/users/<user_id>', methods=['PUT'])
 def update_user(user_id):
     try:
         user = User.query.filter_by(id=user_id).first()
-        
+
         username = request.form.get('username')
         user.username = username if username != None else user.username
 
@@ -68,14 +74,15 @@ def update_user(user_id):
             user.date_of_birth = date(int(y), int(m), int(d))
         else:
             user.date_of_birth = user.date_of_birth
-        
+
         db.session.commit()
-        
+
         print("User {} updated user id={}".format(username, user.id))
         return jsonify({'user': user.serialize()}), 201
     except Exception as e:
         db.session.rollback()
         return(str(e))
+
 
 @app.route('/baguette/api/v1.0/users/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
