@@ -3,12 +3,19 @@ import os
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
 from werkzeug.utils import secure_filename
+import vimeo
 
 from app import app, db
 from app.models.post import Post, serialize, serialize_posts, serialize_replies
 from app.models.content import Content
 from app.models.user import User
 from app.utils.video import validate_video
+
+client = vimeo.VimeoClient(
+  token='ea86b624dcdbe9790b8354ad9c145bb5',
+  key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
+  secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
+)
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -89,38 +96,33 @@ def create_post():
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
-            # TODO: This saves, the uploaded video, instead we want to upload it to YouTube
+
             uploaded_video.seek(0)
             uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
-        # TODO: Create a content record based on the URL retrieved from YouTube
-        '''
-        content = Content(
-            url = request.form.get('url')
-        )
+            uri = client.upload(filename, data={
+                'name': 'Untitled',
+                'description': 'Video uploaded by Flawless Baguettes'
+            })
 
-        db.session.add(content)
-        '''
+            # Creating content record
+            print('Your video URI is: {}'.format(uri))
+            content = Content(
+                url = request.form.get(uri)
+            )
+            db.session.add(content)
 
-        # TODO: Create the post record
-        '''
-        post = Post(
-            parentId = request.form.get('parent_id'),
-            TODO: Uncomment when content record is set
-            contentId = content.id,
-            title = #TODO: Add title
-            userId = request.form.get('user_id'),
-        )
-        '''
+            post = Post(
+                parentId = request.form.get('parent_id'),
+                contentId = content.id,
+                title = 'Untitled',
+                userId = request.form.get('user_id'),
+            )
 
-
-        # TODO: Commit the Post Record to the DB
-        '''
-        db.session.add(post)
-        db.session.commit()
-        print("Post added post id={}".format(post.id))
-        return jsonify({'post': post.serialize()}), 201
-        '''
+            db.session.add(post)
+            db.session.commit()
+            print("Post added post id={}".format(post.id))
+            return jsonify({'post': post.serialize()}), 201
 
         return "Successfully uploaded video", 201
     except Exception as e:
