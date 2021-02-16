@@ -100,8 +100,9 @@ def create_post():
             uploaded_video.seek(0)
             uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
+            title = request.form.get('title')
             uri = client.upload(filename, data={
-                'name': 'Untitled',
+                'name': title,
                 'description': 'Video uploaded by Flawless Baguettes'
             })
 
@@ -115,7 +116,7 @@ def create_post():
             post = Post(
                 parentId = request.form.get('parent_id'),
                 contentId = content.id,
-                title = 'Untitled',
+                title = title,
                 userId = request.form.get('user_id'),
             )
 
