@@ -53,7 +53,6 @@ def create_user():
         )
         db.session.add(user)
         db.session.commit()
-        print("User {} added user id={}".format(user.username, user.id))
 
         userData = {
             "username": user.username,
@@ -150,7 +149,6 @@ def update_user(user_id):
 
         db.session.commit()
 
-        print("User {} updated user id={}".format(username, user.id))
         return jsonify({'user': user.serialize()}), 201
     except Exception as e:
         db.session.rollback()
@@ -163,7 +161,6 @@ def delete_user(user_id):
         user = User.query.filter_by(id=user_id).first()
         db.session.delete(user)
         db.session.commit()
-        print("User {} deleted user id={}".format(user.username, user.id))
     except Exception as e:
         db.session.rollback()
         return(str(e))
