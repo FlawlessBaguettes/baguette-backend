@@ -30,10 +30,19 @@ def get_user(user_id):
 def create_user():
 
     userRequest = request.get_json()
+    username = userRequest['username']
+    email = userRequest['email']
     y, m, d = userRequest['date_of_birth'].split('T')[0].split('-')
     hashedPassword = hashPassword(userRequest['password'])
 
     try:
+        user = User.query.filter_by(email=email).first()
+        if user is not None:
+            return jsonify({"message": "This email has already been registered"}), 400
+        user = User.query.filter_by(username=username).first()
+        if user is not None:
+            return jsonify({"message": "This username has been taken"}), 400
+
         user = User(
             username=userRequest['username'],
             password=hashedPassword,
@@ -59,6 +68,7 @@ def create_user():
         expiryTime = decodedToken["exp"]
 
         return jsonify({
+            "message": "Successfully created account",
             "token": token,
             "expiryTime": expiryTime,
             "userData": userData
@@ -66,7 +76,8 @@ def create_user():
 
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        print(str(e))
+        return jsonify({"message": "Sorry, something went wrong while creating your account. Please try again later."}), 400
 
 
 @ app.route('/baguette/api/v1.0/auth', methods=['POST'])
@@ -78,12 +89,12 @@ def auth_user():
     try:
         user = User.query.filter_by(email=email).first()
         if user is None:
-            return "User doesn't exist"
+            return jsonify({"message": "User doesn't exist"}), 403
 
         isPasswordValid = validatePassword(password, user.password)
 
         if isPasswordValid is False:
-            return "Incorrect password"
+            return jsonify({"message": "Incorrect password"}), 403
 
         userData = {
             "username": user.username,
@@ -98,6 +109,7 @@ def auth_user():
         expiryTime = decodedToken["exp"]
 
         return jsonify({
+            "message": "Successfully authenticated",
             "token": token,
             "expiryTime": expiryTime,
             "userData": userData
@@ -105,7 +117,8 @@ def auth_user():
 
     except Exception as e:
         db.session.rollback()
-        return(str(e))
+        print(str(e))
+        return jsonify({"message": "Sorry, something went wrong while authenticating your account. Please try again later."}), 400
 
 
 @ app.route('/baguette/api/v1.0/users/<user_id>', methods=['PUT'])
