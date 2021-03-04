@@ -82,12 +82,12 @@ def serialize_posts(posts):
 
 
 def serialize_replies(replies):
-    number_of_replies = len(replies)
+    number_of_posts = len(replies)
 
     serializable = {}
-    serializable['number_of_replies'] = number_of_replies
-    serializable['replies'] = []
-    for i in range(0, number_of_replies):
+    serializable['number_of_posts'] = number_of_posts
+    serializable['posts'] = []
+    for i in range(0, number_of_posts):
         child_post = replies[i]
-        serializable['replies'].append(serialize(child_post[0], child_post[1], child_post[2], child_post[3]))
+        serializable['posts'].append(serialize(child_post[0], child_post[1], child_post[2], child_post[3]))
     return serializable
