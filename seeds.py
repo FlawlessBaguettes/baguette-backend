@@ -44,7 +44,8 @@ except Exception as e:
 c = None
 try:
     c = content.Content(
-        url = 'https://www.youtube.com/watch?v=CtmdUiv_sxs',
+        external_id = '265111898',
+        url = 'https://vimeo.com/265111898',
     )
     db.session.add(c)
     db.session.commit()
@@ -57,7 +58,8 @@ except Exception as e:
 c2 = None
 try:
     c2 = content.Content(
-        url = 'https://www.youtube.com/watch?v=BGrfhsxxmdE',
+        external_id = '129920646',
+        url = 'https://vimeo.com/129920646',
     )
     db.session.add(c2)
     db.session.commit()

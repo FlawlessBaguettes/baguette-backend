@@ -58,6 +58,7 @@ def serialize(post, content, user, number_of_replies, isParentReplies=False):
             'user_id': post.userId
         },
         "content": {
+            'external_id': content.external_id,
             'url': content.url,
             "posted_time": prettydate(post.createdAt)
         },
