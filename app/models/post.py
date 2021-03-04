@@ -44,10 +44,9 @@ class Post(db.Model):
             'deleted_at': self.deletedAt
         }
 
-def serialize(post, content, user, number_of_replies, isParentReplies=False):
+def serialize(post, content, user, number_of_replies):
     return {
         'id': post.id,
-        'is_parent_replies': isParentReplies,
         "parent_id": post.parentId,
         'title': post.title,
         'user': {
@@ -82,15 +81,13 @@ def serialize_posts(posts):
     return serializable
 
 
-def serialize_replies(replies, parent):
+def serialize_replies(replies):
     number_of_replies = len(replies)
 
     serializable = {}
     serializable['number_of_replies'] = number_of_replies
-    serializable['has_parent'] = parent != None;
-    serializable['number_of_posts'] = number_of_replies + 1 if parent != None else number_of_replies
-    serializable['posts'] = [serialize(parent[0], parent[1], parent[2], parent[3], isParentReplies = True)]
+    serializable['replies'] = []
     for i in range(0, number_of_replies):
         child_post = replies[i]
-        serializable['posts'].append(serialize(child_post[0], child_post[1], child_post[2], child_post[3]))
+        serializable['replies'].append(serialize(child_post[0], child_post[1], child_post[2], child_post[3]))
     return serializable

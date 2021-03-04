@@ -60,20 +60,6 @@ def get_post(post_id):
 def get_post_replies(post_id):
     try:
         ChildPost = aliased(Post, name='child_post')
-        parent = (
-                    db.session.query(Post, Content, User, func.count(ChildPost.id).over(partition_by=Post.id).label('replies'))
-                    .distinct()
-                    .outerjoin(
-                        (ChildPost, ChildPost.parentId == Post.id)
-                    )
-                    .join(
-                        (Content, Content.id == Post.contentId),
-                        (User, User.id == Post.userId)
-                    )
-                    .filter(Post.id == post_id)
-                    .order_by(Post.createdAt.desc())
-                ).first()
-
         replies = (
                     db.session.query(Post, Content, User, func.count(ChildPost.id).over(partition_by=Post.id).label('replies'))
                     .distinct()
@@ -87,9 +73,7 @@ def get_post_replies(post_id):
                     .filter(Post.parentId == post_id)
                     .order_by(Post.createdAt.desc())
                 ).all()
-        return jsonify({'replies':
-            serialize_replies(replies, parent)
-          }), 200
+        return jsonify({'replies': serialize_replies(replies)}), 200
     except Exception as e:
         db.session.rollback()
         return str(e)
