@@ -90,36 +90,50 @@ def create_post():
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
 
-            print("HITTING A POST REQUEST")
-
             uploaded_video.seek(0)
             video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
             uploaded_video.save(video_path)
 
             title = request.form.get('title') or 'Untitled'
             print("Video title: {}".format(title))
-            '''
-            uri = client.upload(video_path, data={
-                'name': title,
-                'description': 'Video uploaded by Flawless Baguettes'
-            })
-            '''
+            print("Video path: {}".format(video_path))
+
             client = vimeo.VimeoClient(
                 token='29b2d3f5fcbbf63d8f966f7c85973fe5',
                 key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
                 secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
             )
 
-            response = client.get('https://api.vimeo.com/tutorial')
-            print(response.json())
-            # Creating content record
-            # print('Your video URI is: {}'.format(uri), file=sys.stdout)
+            uri = client.upload(video_path, data={
+                'name': title,
+                'description': 'Video uploaded by Flawless Baguettes'
+            })
+            print('Your video URI is: {}'.format(uri))
+            # return "Successfully uploaded to Vimeo", 201
 
-            # response = client.get(uri + '?fields=link').json()
-            # print('The video link is: {}'.format(response['link']))
+            response = client.get(uri + '?fields=link').json()
+            print("Your video link is: {}".format(response['link']))
 
-            # return jsonify({'post': post.serialize()}), 201
-            return response.json(), 201
+            # Create a content record based on the URL retrieved from Vimeo
+
+            content = Content(
+                url = response['link']
+            )
+            db.session.add(content)
+
+            # Create the post record
+            post = Post(
+                parentId = request.form.get('parent_id'),
+                contentId = content.id,
+                title = title,
+                userId = request.form.get('user_id'),
+            )
+
+            # TODO: Commit the Post Record to the DB
+            db.session.add(post)
+            db.session.commit()
+            print("Post added post id={}".format(post.id))
+            return jsonify({'post': post.serialize()}), 201
     except Exception as e:
         print(str(e))
 
