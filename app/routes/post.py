@@ -11,12 +11,6 @@ from app.models.content import Content
 from app.models.user import User
 from app.utils.video import validate_video
 
-client = vimeo.VimeoClient(
-  token='ea86b624dcdbe9790b8354ad9c145bb5',
-  key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
-  secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
-)
-
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
     try:
@@ -87,8 +81,7 @@ def get_post_replies(post_id):
 
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
 def create_post():
-    try:
-
+    try: 
         # Retrieve and validate uploaded video
         uploaded_video = request.files['video']
         filename = secure_filename(uploaded_video.filename)
@@ -97,37 +90,38 @@ def create_post():
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
 
-            uploaded_video.seek(0)
-            uploaded_video.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+            print("HITTING A POST REQUEST")
 
-            title = request.form.get('title')
-            uri = client.upload(filename, data={
+            uploaded_video.seek(0)
+            video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
+            uploaded_video.save(video_path)
+
+            title = request.form.get('title') or 'Untitled'
+            print("Video title: {}".format(title))
+            '''
+            uri = client.upload(video_path, data={
                 'name': title,
                 'description': 'Video uploaded by Flawless Baguettes'
             })
+            '''
+            client = vimeo.VimeoClient(
+                token='29b2d3f5fcbbf63d8f966f7c85973fe5',
+                key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
+                secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
+            )
 
+            response = client.get('https://api.vimeo.com/tutorial')
+            print(response.json())
             # Creating content record
-            print('Your video URI is: {}'.format(uri))
-            content = Content(
-                url = request.form.get(uri)
-            )
-            db.session.add(content)
+            # print('Your video URI is: {}'.format(uri), file=sys.stdout)
 
-            post = Post(
-                parentId = request.form.get('parent_id'),
-                contentId = content.id,
-                title = title,
-                userId = request.form.get('user_id'),
-            )
+            # response = client.get(uri + '?fields=link').json()
+            # print('The video link is: {}'.format(response['link']))
 
-            db.session.add(post)
-            db.session.commit()
-            print("Post added post id={}".format(post.id))
-            return jsonify({'post': post.serialize()}), 201
-
-        return "Successfully uploaded video", 201
+            # return jsonify({'post': post.serialize()}), 201
+            return response.json(), 201
     except Exception as e:
-        return str(e)
+        print(str(e))
 
 @app.route('/baguette/api/v1.0/posts/<post_id>', methods=['PUT'])
 def update_post(post_id):
