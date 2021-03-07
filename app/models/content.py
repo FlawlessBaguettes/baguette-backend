@@ -8,6 +8,7 @@ class Content(db.Model):
     __tablename__ = 'content'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    external_id = Column(db.String(), nullable=False)
     url = Column(db.String(), nullable=False)
 
     post = db.relationship('Post', backref='content', uselist=False)
@@ -17,7 +18,8 @@ class Content(db.Model):
     updatedAt = Column(DateTime, onupdate=func.now())
     deletedAt = Column(DateTime)
 
-    def __init__(self, url):
+    def __init__(self, external_id, url):
+        self.external_id = external_id
         self.url = url
 
     def __repr__(self):
@@ -26,6 +28,7 @@ class Content(db.Model):
     def serialize(self):
         return {
             'id': self.id,
+            'external_id': self.external_id,
             "url": self.contentUrl,
             'createdAt': self.createdAt,
             'updatedAt': self.updatedAt,
