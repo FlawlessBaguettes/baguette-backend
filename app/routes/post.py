@@ -11,6 +11,12 @@ from app.models.content import Content
 from app.models.user import User
 from app.utils.video import validate_video
 
+VIMEO_CLIENT = vimeo.VimeoClient(
+    token='29b2d3f5fcbbf63d8f966f7c85973fe5',
+    key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
+    secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
+)
+
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
     try:
@@ -98,26 +104,26 @@ def create_post():
             print("Video title: {}".format(title))
             print("Video path: {}".format(video_path))
 
-            client = vimeo.VimeoClient(
-                token='29b2d3f5fcbbf63d8f966f7c85973fe5',
-                key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
-                secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
-            )
-
-            uri = client.upload(video_path, data={
+            uri_response = VIMEO_CLIENT.upload(video_path, data={
                 'name': title,
                 'description': 'Video uploaded by Flawless Baguettes'
             })
+
+            # URI response provided in the form of /videos/<external_id> (e.g. /videos/520857963)
+            uri = uri_response.split('/')[-1]
             print('Your video URI is: {}'.format(uri))
 
-            response = client.get(uri + '?fields=link').json()
-            print("Your video link is: {}".format(response['link']))
+            link_response = VIMEO_CLIENT.get(uri_response + '?fields=link').json()
+            video_link = link_response['link']
+            print("Your video link is: {}".format(video_link))
 
             # Create a content record based on the URL retrieved from Vimeo
             content = Content(
-                url = response['link']
+                url = video_link,
+                external_id = uri
             )
             db.session.add(content)
+            db.session.commit()
 
             # Create the post record
             post = Post(
