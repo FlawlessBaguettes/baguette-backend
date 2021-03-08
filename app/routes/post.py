@@ -109,13 +109,11 @@ def create_post():
                 'description': 'Video uploaded by Flawless Baguettes'
             })
             print('Your video URI is: {}'.format(uri))
-            # return "Successfully uploaded to Vimeo", 201
 
             response = client.get(uri + '?fields=link').json()
             print("Your video link is: {}".format(response['link']))
 
             # Create a content record based on the URL retrieved from Vimeo
-
             content = Content(
                 url = response['link']
             )
