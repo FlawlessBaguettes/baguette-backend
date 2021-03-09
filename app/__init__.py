@@ -48,4 +48,4 @@ from app.models import models
 from app.routes import routes
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
