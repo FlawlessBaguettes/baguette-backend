@@ -125,12 +125,15 @@ def create_post():
             db.session.add(content)
             db.session.commit()
 
+            userId = request.form.get('userId')
+            print("Creating a new post for the user: {}".format(userId))
+
             # Create the post record
             post = Post(
                 parentId = request.form.get('parent_id'),
                 contentId = content.id,
                 title = title,
-                userId = request.form.get('user_id'),
+                userId = userId,
             )
 
             # TODO: Commit the Post Record to the DB
