@@ -3,7 +3,10 @@ from datetime import date
 from flask import Flask, request, jsonify
 from app.models.user import User
 from app.utils.authentication import createToken, hashPassword, validatePassword
-import jwt
+
+from flask_jwt_extended import create_access_token, decode_token, JWTManager
+
+jwt = JWTManager(app)
 
 
 @app.route('/baguette/api/v1.0/users', methods=['GET'])
@@ -62,8 +65,7 @@ def create_user():
             "lastName": user.last_name
         }
         token = createToken(userData)
-        decodedToken = jwt.decode(
-            token, app.config["SECRET_KEY"], algorithms="HS256")
+        decodedToken = decode_token(token)
         expiryTime = decodedToken["exp"]
 
         return jsonify({
@@ -103,15 +105,14 @@ def auth_user():
             "lastName": user.last_name
         }
         token = createToken(userData)
-        decodedToken = jwt.decode(
-            token, app.config["SECRET_KEY"], algorithms="HS256")
+        decodedToken = decode_token(token)
         expiryTime = decodedToken["exp"]
 
         return jsonify({
             "message": "Successfully authenticated",
             "token": token,
-            "expiryTime": expiryTime,
-            "userData": userData
+            "userData": userData,
+            "expiryTime": expiryTime
         }), 201
 
     except Exception as e:
