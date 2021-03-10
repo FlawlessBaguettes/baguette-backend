@@ -1,10 +1,10 @@
 from flask import abort, Flask, jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 import os
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
-from werkzeug.utils import secure_filename
 import vimeo
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
 
 from app import app, db
 from app.models.post import Post, serialize, serialize_posts, serialize_replies
@@ -136,10 +136,8 @@ def create_post():
             # Retrieve user id from token
             current_identity = get_jwt_identity()
             user_id = current_identity["id"]
-            print("Creating a new post for the user: {}".format(user_id))
 
             parent_id = request.form.get('parent_id')
-            print("The parent id of the post is: {}".format(parent_id))
 
             # Create the post record
             post = Post(
@@ -148,14 +146,13 @@ def create_post():
                 title = title,
                 userId = user_id,
             )
-
-            # TODO: Commit the Post Record to the DB
             db.session.add(post)
             db.session.commit()
             print("Post added post id={}".format(post.id))
             return jsonify({'post': post.serialize()}), 201
     except Exception as e:
         print(str(e))
+        return jsonify({"message": "Sorry, something went wrong while uploading your video. Please try again later."}), 400
 
 
 @app.route('/baguette/api/v1.0/posts/<post_id>', methods=['PUT'])
