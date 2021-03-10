@@ -138,9 +138,12 @@ def create_post():
             user_id = current_identity["id"]
             print("Creating a new post for the user: {}".format(user_id))
 
+            parent_id = request.form.get('parent_id')
+            print("The parent id of the post is: {}".format(parent_id))
+
             # Create the post record
             post = Post(
-                parentId = request.form.get('parent_id'),
+                parentId = parent_id,
                 contentId = content.id,
                 title = title,
                 userId = user_id,
