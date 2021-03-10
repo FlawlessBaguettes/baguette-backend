@@ -1,18 +1,18 @@
-import jwt
 import bcrypt
 import datetime
 
 from app import app
+from flask_jwt_extended import create_access_token
 
 
 def createToken(user):
-    token = jwt.encode({
+
+    access_token = create_access_token(identity={
         "id": user["id"],
         "username": user["username"],
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(weeks=52),
-    }, app.config["SECRET_KEY"], algorithm="HS256")
+    })
 
-    return token
+    return access_token
 
 
 def hashPassword(password):
