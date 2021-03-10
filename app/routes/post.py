@@ -3,7 +3,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import os
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
-import vimeo
 from werkzeug.utils import secure_filename
 
 from app import app, db
@@ -11,12 +10,6 @@ from app.models.post import Post, serialize, serialize_posts, serialize_replies
 from app.models.content import Content
 from app.models.user import User
 from app.utils.video import validate_video
-
-VIMEO_CLIENT = vimeo.VimeoClient(
-    token='29b2d3f5fcbbf63d8f966f7c85973fe5',
-    key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
-    secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
-)
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -112,7 +105,9 @@ def create_post():
             print("Video title: {}".format(title))
             print("Video path: {}".format(video_path))
 
-            uri_response = VIMEO_CLIENT.upload(video_path, data={
+            vimeo_client = app.config["VIMEO_CLIENT"]
+
+            uri_response = vimeo_client.upload(video_path, data={
                 'name': title,
                 'description': 'Video uploaded by Flawless Baguettes'
             })
@@ -121,7 +116,7 @@ def create_post():
             uri = uri_response.split('/')[-1]
             print('Your video URI is: {}'.format(uri))
 
-            link_response = VIMEO_CLIENT.get(uri_response + '?fields=link').json()
+            link_response = vimeo_client.get(uri_response + '?fields=link').json()
             video_link = link_response['link']
             print("Your video link is: {}".format(video_link))
 
