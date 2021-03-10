@@ -11,11 +11,14 @@ from app.models.content import Content
 from app.models.user import User
 from app.utils.video import validate_video
 
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 VIMEO_CLIENT = vimeo.VimeoClient(
     token='29b2d3f5fcbbf63d8f966f7c85973fe5',
     key='cd8615a35359c7d8bd60bb9766a9e9a80aa1ef01',
     secret='Xy1iTA658MNPtM8AjOezNafd33kaQx7s/Lw3rO5u8Swh6+xH1nsqCnO5eTt093n0y20kJc0mo/jEgWM/MxKjWH1wNc4zu/7VSyfbR55C4mWaEQvqvDvGm7Ay4EuVK/A4'
 )
+
 
 @app.route('/baguette/api/v1.0/posts', methods=['GET'])
 def get_posts():
@@ -92,12 +95,16 @@ def get_post_replies(post_id):
 
 
 @app.route('/baguette/api/v1.0/posts', methods=['POST'])
-@jwt_required()
+@jwt_required(optional=True)
 def create_post():
     try:
         # Retrieve and validate uploaded video
-        uploaded_video = request.files['video']
-        filename = secure_filename(uploaded_video.filename)
+        userRequest = request.get_json()
+        print("userRequest: " + str(userRequest))
+        uploaded_video = userRequest['video']
+        print("uploaded video: " + str(uploaded_video))
+        filename = secure_filename(uploaded_video['filename'])
+        print("filename: " + str(filename))
         if filename != '':
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
@@ -107,7 +114,8 @@ def create_post():
             video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
             uploaded_video.save(video_path)
 
-            title = request.form.get('title') or 'Untitled'
+            title = userRequest['title'] or 'Untitled'
+            print("title: " + title)
             print("Video title: {}".format(title))
             print("Video path: {}".format(video_path))
 
@@ -120,14 +128,15 @@ def create_post():
             uri = uri_response.split('/')[-1]
             print('Your video URI is: {}'.format(uri))
 
-            link_response = VIMEO_CLIENT.get(uri_response + '?fields=link').json()
+            link_response = VIMEO_CLIENT.get(
+                uri_response + '?fields=link').json()
             video_link = link_response['link']
             print("Your video link is: {}".format(video_link))
 
             # Create a content record based on the URL retrieved from Vimeo
             content = Content(
-                url = video_link,
-                external_id = uri
+                url=video_link,
+                external_id=uri
             )
             db.session.add(content)
             db.session.commit()
@@ -139,10 +148,10 @@ def create_post():
 
             # Create the post record
             post = Post(
-                parentId = request.form.get('parent_id'),
-                contentId = content.id,
-                title = title,
-                userId = user_id,
+                parentId=request.form.get('parent_id'),
+                contentId=content.id,
+                title=title,
+                userId=user_id,
             )
 
             # TODO: Commit the Post Record to the DB
@@ -151,10 +160,10 @@ def create_post():
             print("Post added post id={}".format(post.id))
             return jsonify({'post': post.serialize()}), 201
     except Exception as e:
-        print(str(e))
+        return jsonify({'msg': "error: " + str(e)}), 400
 
 
-@app.route('/baguette/api/v1.0/posts/<post_id>', methods=['PUT'])
+@ app.route('/baguette/api/v1.0/posts/<post_id>', methods=['PUT'])
 def update_post(post_id):
     try:
         post = Post.query.filter_by(id=post_id).first()
@@ -177,7 +186,7 @@ def update_post(post_id):
         return str(e)
 
 
-@app.route('/baguette/api/v1.0/posts/<post_id>', methods=['DELETE'])
+@ app.route('/baguette/api/v1.0/posts/<post_id>', methods=['DELETE'])
 def delete_post(post_id):
     try:
         post = Post.query.filter_by(id=post_id).first()
