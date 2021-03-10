@@ -4,6 +4,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, func, over
 from werkzeug.utils import secure_filename
 import vimeo
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app import app, db
 from app.models.post import Post, serialize, serialize_posts, serialize_replies
