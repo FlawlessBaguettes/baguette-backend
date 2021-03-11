@@ -97,33 +97,25 @@ def create_post():
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_video(uploaded_video.stream):
                 abort(400)
 
-            uploaded_video.seek(0)
-            video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
-            uploaded_video.save(video_path)
-
-            title = request.form.get('title') or 'Untitled'
-            print("Video title: {}".format(title))
-            print("Video path: {}".format(video_path))
-
             vimeo_client = app.config["VIMEO_CLIENT"]
+            video_path = os.path.join(app.config['UPLOAD_PATH'], filename)
+            title = request.form.get('title') or 'Untitled'
 
-            uri_response = vimeo_client.upload(video_path, data={
+            upload_response = vimeo_client.upload(video_path, data={
                 'name': title,
                 'description': 'Video uploaded by Flawless Baguettes'
             })
 
-            # URI response provided in the form of /videos/<external_id> (e.g. /videos/520857963)
-            uri = uri_response.split('/')[-1]
-            print('Your video URI is: {}'.format(uri))
+            # Upload response provided in the form of /videos/<external_id> (e.g. /videos/520857963)
+            vimeo_id = upload_response.split('/')[-1]
 
-            link_response = vimeo_client.get(uri_response + '?fields=link').json()
+            link_response = vimeo_client.get(upload_response + '?fields=link').json()
             video_link = link_response['link']
-            print("Your video link is: {}".format(video_link))
 
             # Create a content record based on the URL retrieved from Vimeo
             content = Content(
                 url = video_link,
-                external_id = uri
+                external_id = vimeo_id
             )
             db.session.add(content)
             db.session.commit()
