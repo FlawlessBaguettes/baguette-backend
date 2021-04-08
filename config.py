@@ -9,14 +9,15 @@ class Config(object):
 
     # To access secrets stored in secrets.ejson, you must first decrypt them.
     # Decrypt the secrets.ejson by following the steps below:
-    #   1. Paste your private key in the file: `/opt/ejson/keys/<public key>`
+    #   1. Paste your private key in the file: `/opt/ejson/keys/<public key>`.
+    #      You can find the plaintext public key in secrets.ejson - it is never encrypted.
     #   2. Run the command: `ejson decrypt secrets.ejson` which outputs secrets.ejson in plaintext to stdout
     #   3. Copy the plaintext from stdout and paste it in secrets.ejson, overwriting the ciphertext
-
+    #
     # IMPORTANT: To prevent secrets leaking, re-encrypt secrets.ejson before committing to version control.
-    # Run `ejson encrypt secrets.ejson` to encrypt secrets.ejson
-    # (secrets.ejson is included in .gitignore as an extra precaution)
-    # See https://github.com/Shopify/ejson for detailed instructions.
+    # Run `ejson encrypt secrets.ejson` to encrypt secrets.ejson.
+    #
+    # For more info on ejson, see https://github.com/Shopify/ejson
 
     with open('secrets.ejson') as ejson_file:
         secretsData = json.load(ejson_file)
