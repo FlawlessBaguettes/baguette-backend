@@ -40,9 +40,9 @@ class Config(object):
 
     VIMEO_CLIENT = secretsData["VIMEO_CLIENT"]
     VIMEO_CLIENT = vimeo.VimeoClient(
-        token=VIMEO_CLIENT.token,
-        key=VIMEO_CLIENT.key,
-        secret=VIMEO_CLIENT.secret
+        token=VIMEO_CLIENT["token"],
+        key=VIMEO_CLIENT["key"],
+        secret=VIMEO_CLIENT["secret"]
     )
 
 
