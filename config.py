@@ -8,7 +8,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
 
     # To access secrets stored in secrets.ejson, you must first decrypt them.
-    # Decrypt the secrets.ejson by following the steps below:
+    # Decrypt secrets.ejson by following the steps below:
     #   1. Paste your private key in the file: `/opt/ejson/keys/<public key>`.
     #      You can find the plaintext public key in secrets.ejson - it is never encrypted.
     #   2. Run the command: `ejson decrypt secrets.ejson` which outputs secrets.ejson in plaintext to stdout
