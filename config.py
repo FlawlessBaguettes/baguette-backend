@@ -7,15 +7,21 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
 
-    # To access secrets stored in secrets.ejson, you must first decrypt them.
+    # Some config params are stored as secrets in secrets.ejson, an encrypted JSON file.
+    # To access them, you first need to decrypt secrets.ejson.
     # Decrypt secrets.ejson by following the steps below:
-    #   1. Paste your private key in the file: `/opt/ejson/keys/<public key>`.
-    #      You can find the plaintext public key in secrets.ejson - it is never encrypted.
-    #   2. Run the command: `ejson decrypt secrets.ejson` which outputs secrets.ejson in plaintext to stdout
-    #   3. Copy the plaintext from stdout and paste it in secrets.ejson, overwriting the ciphertext
     #
-    # IMPORTANT: To prevent secrets leaking, re-encrypt secrets.ejson before committing to version control.
-    # Run `ejson encrypt secrets.ejson` to encrypt secrets.ejson.
+    #   1. Get the public key from the top of the secrets.ejson (this value is always in plaintext)
+    #   2. Create a file named after your public key in `opt/ejson/keys` by running:
+    #      `touch /opt/ejson/keys/<PUBLIC_KEY_HERE>`
+    #   3. Copy and paste your private key into the file.
+    #   4. Decrypt secrets.ejson using the private key by running:
+    #      `ejson decrypt secrets.ejson`
+    #      This command outputs secrets.ejson in plaintext to stdout.
+    #   5. Replace the contents of secrets.ejson with the plaintext outputted in step 4.
+    #
+    # IMPORTANT: To prevent secrets leaking, ensure secrets.ejson is encrypted before committing any changes
+    # to the file into version control. Run `ejson encrypt secrets.ejson`.
     #
     # For more info on ejson, see https://github.com/Shopify/ejson
 
