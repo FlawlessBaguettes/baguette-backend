@@ -12,7 +12,7 @@ class Config(object):
     # Decrypt secrets.ejson by following the steps below:
     #
     #   1. Get the public key from the top of the secrets.ejson (this value is always in plaintext)
-    #   2. Create a file named after your public key in `opt/ejson/keys` by running:
+    #   2. Create a file named after your public key in `/opt/ejson/keys` by running:
     #      `touch /opt/ejson/keys/<PUBLIC_KEY_HERE>`
     #   3. Copy and paste your private key into the file.
     #   4. Decrypt secrets.ejson using the private key by running:
