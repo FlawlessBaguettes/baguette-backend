@@ -7,18 +7,17 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
 
-    # Some config params are stored as secrets in secrets.ejson, an encrypted JSON file.
-    # To access them, you first need to decrypt secrets.ejson.
+    # Secrets are stored in secrets.ejson, an encrypted JSON file.
+    # Before running the server, you need to locally decrypt secrets.ejson so they can be accessed at runtime.
     # Decrypt secrets.ejson by following the steps below:
     #
-    #   1. Get the public key from the top of the secrets.ejson (this value is always in plaintext)
+    #   1. Copy the public key from the top of secrets.ejson (this value is always in plaintext)
     #   2. Create a file named after your public key in `/opt/ejson/keys` by running:
     #      `touch /opt/ejson/keys/<PUBLIC_KEY_HERE>`
-    #   3. Copy and paste your private key into the file.
-    #   4. Decrypt secrets.ejson using the private key by running:
-    #      `ejson decrypt secrets.ejson`
-    #      This command outputs secrets.ejson in plaintext to stdout.
-    #   5. Replace the contents of secrets.ejson with the plaintext outputted in step 4.
+    #   3. Copy and paste the associated private key into the file created in step 2.
+    #   4. Decrypt secrets.ejson by running: `ejson decrypt secrets.ejson`.
+    #      This will output secrets.ejson in plaintext to stdout.
+    #   5. Overwrite secrets.ejson with the plaintext outputted in step 4.
     #
     # IMPORTANT: To prevent secrets leaking, ensure secrets.ejson is encrypted before committing any changes
     # to the file into version control. Run `ejson encrypt secrets.ejson`.
